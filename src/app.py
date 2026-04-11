@@ -1,10 +1,22 @@
-import soundfile as sf
-from PyQt6.QtWidgets import QMainWindow, QMenuBar, QVBoxLayout, QWidget
+from datetime import datetime
+from pathlib import Path
 
-from src import audio, config
+import soundfile as sf
+from PyQt6.QtWidgets import (
+    QMainWindow,
+    QMenuBar,
+    QStackedWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
+from src import audio, config, library
 from src.dialogs.settings_dialog import SettingsDialog
 from src.model import GenerationWorker
+from src.ollama import NamingWorker
 from src.widgets.ai_panel import AIPanel
+from src.widgets.library_panel import LibraryPanel
+from src.widgets.nav_bar import NavBar
 from src.widgets.output_panel import OutputPanel
 from src.widgets.reference_panel import ReferencePanel
 from src.widgets.settings_panel import SettingsPanel
@@ -18,6 +30,9 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(620)
         self._cfg = config.load()
         self._worker: GenerationWorker | None = None
+        self._naming_worker: NamingWorker | None = None
+        self._current_output_path: str | None = None
+        self._current_output_id: str | None = None
         self._setup_menu()
         self._setup_ui()
 
@@ -31,9 +46,21 @@ class MainWindow(QMainWindow):
     def _setup_ui(self):
         central = QWidget()
         self.setCentralWidget(central)
-        layout = QVBoxLayout(central)
-        layout.setSpacing(10)
-        layout.setContentsMargins(14, 14, 14, 14)
+        outer_layout = QVBoxLayout(central)
+        outer_layout.setSpacing(0)
+        outer_layout.setContentsMargins(0, 0, 0, 0)
+
+        self._nav_bar = NavBar()
+        outer_layout.addWidget(self._nav_bar)
+
+        self._stack = QStackedWidget()
+        outer_layout.addWidget(self._stack)
+
+        # Page 0: Generate view
+        generate_page = QWidget()
+        gen_layout = QVBoxLayout(generate_page)
+        gen_layout.setSpacing(10)
+        gen_layout.setContentsMargins(14, 14, 14, 14)
 
         self._ref_panel = ReferencePanel(self._cfg)
         self._ai_panel = AIPanel(
@@ -46,16 +73,26 @@ class MainWindow(QMainWindow):
         self._settings_panel = SettingsPanel(self._cfg)
         self._output_panel = OutputPanel()
 
-        layout.addWidget(self._ref_panel)
-        layout.addWidget(self._ai_panel)
-        layout.addWidget(self._text_panel)
-        layout.addWidget(self._settings_panel)
-        layout.addWidget(self._output_panel)
+        gen_layout.addWidget(self._ref_panel)
+        gen_layout.addWidget(self._ai_panel)
+        gen_layout.addWidget(self._text_panel)
+        gen_layout.addWidget(self._settings_panel)
+        gen_layout.addWidget(self._output_panel)
+        self._stack.addWidget(generate_page)
 
+        # Page 1: Library view
+        self._library_panel = LibraryPanel()
+        self._library_panel.load_entries(library.load())
+        self._stack.addWidget(self._library_panel)
+
+        # Wiring
+        self._nav_bar.view_changed.connect(self._stack.setCurrentIndex)
         self._ref_panel.reference_changed.connect(self._on_reference_changed)
         self._ai_panel.result_ready.connect(self._text_panel.set_text)
         self._settings_panel.settings_changed.connect(self._on_settings_changed)
         self._output_panel.generate_requested.connect(self._on_generate)
+        self._output_panel.file_renamed.connect(self._on_file_renamed)
+        self._library_panel.entry_deleted.connect(self._on_library_entry_deleted)
 
     def _open_settings_dialog(self):
         dialog = SettingsDialog(self._cfg, parent=self)
@@ -77,8 +114,25 @@ class MainWindow(QMainWindow):
         config.save(self._cfg)
         self._ref_panel.update_recents(self._cfg)
 
+        profile = self._cfg["voice_profiles"].get(path)
+        if profile:
+            self._settings_panel.set_values(
+                profile["cfg_value"],
+                profile["inference_timesteps"],
+                profile["use_denoiser"],
+            )
+        else:
+            self._settings_panel.set_values(2.0, 10, False)
+
     def _on_settings_changed(self, values: dict):
         self._cfg.update(values)
+        current_voice = self._ref_panel.current_path()
+        if current_voice:
+            self._cfg["voice_profiles"][current_voice] = {
+                "cfg_value": values["cfg_value"],
+                "inference_timesteps": values["inference_timesteps"],
+                "use_denoiser": values["use_denoiser"],
+            }
         config.save(self._cfg)
 
     def closeEvent(self, event):
@@ -127,4 +181,56 @@ class MainWindow(QMainWindow):
         except Exception as e:
             self._output_panel.show_error(f"Failed to save output file:\n{e}")
             return
+
+        self._current_output_path = out_path
+        self._current_output_id = Path(out_path).stem
+
+        text = self._text_panel.text()
+        ref_path = self._ref_panel.current_path()
+
+        entry = {
+            "id": self._current_output_id,
+            "filename": Path(out_path).name,
+            "voice_path": ref_path or "",
+            "text": text,
+            "settings": self._settings_panel.values(),
+            "created_at": datetime.now().isoformat(timespec="seconds"),
+        }
+        entries = library.add_entry(entry)
+        self._library_panel.load_entries(entries)
         self._output_panel.set_output(out_path)
+
+        if self._cfg.get("ollama_enabled") and self._cfg.get("ollama_model"):
+            self._naming_worker = NamingWorker(
+                text=text,
+                host=self._cfg["ollama_host"],
+                port=self._cfg["ollama_port"],
+                model=self._cfg["ollama_model"],
+            )
+            self._naming_worker.finished.connect(self._on_name_suggested)
+            self._naming_worker.start()
+
+    def _on_name_suggested(self, name: str):
+        self._naming_worker.wait()
+        self._output_panel.set_filename(name)
+
+    def _on_file_renamed(self, old_path: str, new_name: str):
+        new_path = audio.rename_output(old_path, new_name)
+        if new_path == old_path:
+            return
+        self._current_output_path = new_path
+        entries = library.update_filename(
+            self._current_output_id, Path(new_path).name
+        )
+        self._library_panel.load_entries(entries)
+        self._output_panel.update_output_path(new_path)
+
+    def _on_library_entry_deleted(self, entry_id: str):
+        entries = library.load()
+        entry = next((e for e in entries if e["id"] == entry_id), None)
+        if entry:
+            file_path = audio.OUTPUT_DIR / entry["filename"]
+            if file_path.exists():
+                file_path.unlink()
+        entries = library.delete_entry(entry_id)
+        self._library_panel.load_entries(entries)
