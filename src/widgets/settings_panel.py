@@ -96,3 +96,22 @@ class SettingsPanel(QGroupBox):
             "inference_timesteps": self._steps_spin.value(),
             "use_denoiser": self._denoiser_check.isChecked(),
         }
+
+    def set_values(self, cfg_value: float, inference_timesteps: int, use_denoiser: bool) -> None:
+        self._cfg_spin.blockSignals(True)
+        self._cfg_slider.blockSignals(True)
+        self._steps_spin.blockSignals(True)
+        self._steps_slider.blockSignals(True)
+        self._denoiser_check.blockSignals(True)
+
+        self._cfg_spin.setValue(cfg_value)
+        self._cfg_slider.setValue(int(round(cfg_value * 10)))
+        self._steps_spin.setValue(inference_timesteps)
+        self._steps_slider.setValue(inference_timesteps)
+        self._denoiser_check.setChecked(use_denoiser)
+
+        self._cfg_spin.blockSignals(False)
+        self._cfg_slider.blockSignals(False)
+        self._steps_spin.blockSignals(False)
+        self._steps_slider.blockSignals(False)
+        self._denoiser_check.blockSignals(False)
