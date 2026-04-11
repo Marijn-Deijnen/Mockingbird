@@ -52,8 +52,9 @@ class NamingWorker(QThread):
                 json={
                     "model": self.model,
                     "prompt": (
-                        "Give a 3-5 word title for this text, suitable as a filename. "
-                        "No punctuation, no quotes. Only the title, nothing else. "
+                        "Give a title for this text, suitable as a filename. "
+                        "Maximum 5 words. No punctuation, no quotes, no explanation. "
+                        "Only the title words, nothing else. "
                         f"Text: {self.text}"
                     ),
                     "stream": False,
@@ -63,7 +64,8 @@ class NamingWorker(QThread):
             response.raise_for_status()
             raw = response.json()["response"].strip()
             name = re.sub(r"[^\w\s-]", "", raw).strip()
-            name = re.sub(r"\s+", "_", name).lower()
+            words = name.split()[:5]
+            name = "_".join(words).lower()
             if name:
                 self.finished.emit(name)
         except Exception:

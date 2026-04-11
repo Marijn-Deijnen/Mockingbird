@@ -10,9 +10,11 @@ Upload a reference audio clip, type what you want it to say, and generate a clon
 
 - **Reference audio selection** — browse for any `.wav` or `.mp3` file; `.mp3` files are auto-converted
 - **Recent references** — last 10 used files remembered across sessions
-- **Voice settings** — CFG value, inference steps, and optional denoiser, all adjustable with linked sliders
+- **Per-voice settings** — CFG value, inference steps, and denoiser toggle saved per reference file; switching voices automatically restores their settings
 - **Audio playback** — listen to generated output directly in the app
-- **Output saving** — generated audio saved to `output/` with a timestamped filename
+- **File naming** — rename generated files inline; AI auto-names files when Ollama is enabled (max 5 words)
+- **Library view** — browse all generated files with voice and text info, filter by voice, and play or delete entries
+- **GPU acceleration** — uses CUDA automatically if an NVIDIA GPU is available, falls back to CPU
 - **Optional AI prompt panel** — connect to a local [Ollama](https://ollama.com) server to generate text that auto-fills the "Text to Speak" box
 
 ---
@@ -21,9 +23,13 @@ Upload a reference audio clip, type what you want it to say, and generate a clon
 
 - Python 3.11+
 - [FFmpeg](https://ffmpeg.org/download.html) on your `PATH` (for MP3 conversion)
-- [Ollama](https://ollama.com) (optional, for the AI prompt feature)
+- PyTorch with CUDA support (recommended for GPU acceleration):
+  ```bash
+  pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+  ```
+- [Ollama](https://ollama.com) (optional, for AI prompt and auto-naming)
 
-Install Python dependencies:
+Install remaining Python dependencies:
 
 ```bash
 pip install pyqt6 voxcpm soundfile requests imageio-ffmpeg
@@ -43,13 +49,19 @@ python main.py
 2. Type the text you want spoken in the **Text to Speak** box
 3. Adjust **CFG Value**, **Inference Steps**, and **Use Denoiser** as desired
 4. Click **Generate** — the output is saved to `output/` and playback controls appear
+5. Rename the file using the filename field below the player, or let AI name it automatically
 
-### AI prompt (optional)
+### Library
+
+Switch to the **Library** tab to see all generated files. Each entry shows the filename, reference voice, and a preview of the spoken text. Use the **Filter by voice** dropdown to narrow the list. Click **▶** to play or **✕** to delete.
+
+### AI assistant (optional)
 
 1. Open **Settings → AI Settings...**
 2. Enter your Ollama host and port, click **Connect**, and select a model
 3. Check **Enable AI Assistant** and click **Save**
 4. The **AI Prompt** panel appears above the text box — describe what you want the AI to write, click **Ask AI**, and the result is placed into "Text to Speak" automatically
+5. After each generation, the AI will also suggest a short filename (up to 5 words) and rename the file automatically
 
 ---
 
@@ -61,40 +73,7 @@ python main.py
 | Inference Steps | 10 | Diffusion sampling steps. More steps = slower but potentially cleaner output |
 | Use Denoiser | Off | Apply a post-processing denoiser to the output |
 
----
-
-## Project Structure
-
-```
-main.py                        # Entry point
-src/
-  app.py                       # MainWindow — layout and signal wiring
-  config.py                    # Load/save config.json
-  audio.py                     # WAV conversion and output path helpers
-  model.py                     # GenerationWorker (QThread wrapping VoxCPM2)
-  ollama.py                    # fetch_models() + OllamaWorker (QThread)
-  widgets/
-    reference_panel.py         # Reference audio selection panel
-    text_panel.py              # Text to Speak input
-    settings_panel.py          # CFG/steps/denoiser controls
-    output_panel.py            # Generate/Play/Stop buttons and progress
-    ai_panel.py                # AI Prompt panel (shown when Ollama enabled)
-  dialogs/
-    settings_dialog.py         # AI Settings dialog
-tests/
-  test_audio.py
-  test_config.py
-  test_ollama.py
-output/                        # Generated audio files (gitignored)
-```
-
----
-
-## Running Tests
-
-```bash
-pytest tests/ -v
-```
+Settings are saved per reference voice. Switching to a different voice restores that voice's last-used settings.
 
 ---
 
