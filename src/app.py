@@ -212,7 +212,10 @@ class MainWindow(QMainWindow):
 
     def _on_name_suggested(self, name: str):
         self._naming_worker.wait()
-        self._output_panel.set_filename(name)
+        if self._current_output_path:
+            self._on_file_renamed(self._current_output_path, name)
+        else:
+            self._output_panel.set_filename(name)
 
     def _on_file_renamed(self, old_path: str, new_name: str):
         try:
