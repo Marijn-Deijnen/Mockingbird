@@ -21,7 +21,7 @@ def test_output_path_format(tmp_output):
     import src.audio as audio_mod
     path = audio_mod.output_path()
     filename = Path(path).name
-    assert re.match(r"\d{4}-\d{2}-\d{2}_\d{6}\.wav", filename), f"Bad format: {filename}"
+    assert re.match(r"\d{4}-\d{2}-\d{2}_\d{6}_\d+\.wav", filename), f"Bad format: {filename}"
 
 
 def test_ensure_wav_passthrough_for_wav(tmp_path):

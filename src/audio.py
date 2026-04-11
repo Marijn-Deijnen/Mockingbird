@@ -10,6 +10,8 @@ OUTPUT_DIR = Path(__file__).parent.parent / "output"
 def ensure_wav(path: str) -> str:
     """Return a .wav path for the given audio file, converting from mp3 if needed."""
     p = Path(path)
+    if not p.exists():
+        raise FileNotFoundError(f"Audio file not found: {path}")
     if p.suffix.lower() == ".wav":
         return str(p)
     wav_path = p.with_suffix(".wav")
@@ -22,5 +24,5 @@ def ensure_wav(path: str) -> str:
 def output_path() -> str:
     """Return a timestamped output path, creating the output directory if needed."""
     OUTPUT_DIR.mkdir(exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
     return str(OUTPUT_DIR / f"{timestamp}.wav")

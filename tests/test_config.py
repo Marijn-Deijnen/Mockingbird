@@ -63,3 +63,11 @@ def test_add_recent_reference_caps_at_10(tmp_config):
     for i in range(12):
         cfg = cfg_mod.add_recent_reference(cfg, f"/audio/{i}.wav")
     assert len(cfg["recent_references"]) == 10
+
+
+def test_load_returns_defaults_on_corrupted_file(tmp_config):
+    import src.config as cfg_mod
+    tmp_config.write_bytes(b"not valid json{{{{")
+    result = cfg_mod.load()
+    assert result["cfg_value"] == 2.0
+    assert result["recent_references"] == []

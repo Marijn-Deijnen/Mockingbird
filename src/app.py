@@ -51,7 +51,8 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         if self._worker is not None and self._worker.isRunning():
             self._worker.quit()
-            self._worker.wait(3000)
+            if not self._worker.wait(3000):
+                self._worker.terminate()
         super().closeEvent(event)
 
     def _on_generate(self):
