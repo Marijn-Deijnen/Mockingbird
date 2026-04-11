@@ -71,3 +71,12 @@ def test_load_returns_defaults_on_corrupted_file(tmp_config):
     result = cfg_mod.load()
     assert result["cfg_value"] == 2.0
     assert result["recent_references"] == []
+
+
+def test_load_includes_ollama_defaults(tmp_config):
+    import src.config as cfg_mod
+    result = cfg_mod.load()
+    assert result["ollama_enabled"] is False
+    assert result["ollama_host"] == "127.0.0.1"
+    assert result["ollama_port"] == 11434
+    assert result["ollama_model"] == ""

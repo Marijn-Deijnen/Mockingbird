@@ -9,6 +9,10 @@ DEFAULTS = {
     "cfg_value": 2.0,
     "inference_timesteps": 10,
     "use_denoiser": False,
+    "ollama_enabled": False,
+    "ollama_host": "127.0.0.1",
+    "ollama_port": 11434,
+    "ollama_model": "",
 }
 
 
