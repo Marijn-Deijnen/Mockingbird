@@ -1,5 +1,7 @@
 # Mockingbird
 
+<img src="src/assets/icon.png" alt="Mockingbird" width="120" align="right"/>
+
 A desktop GUI for reference-based voice cloning powered by [VoxCPM2](https://github.com/OpenBMB/VoxCPM).
 
 Upload a reference audio clip, type what you want it to say, and generate a cloned voice — all from a simple local app with no cloud dependency.
