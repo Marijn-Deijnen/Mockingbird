@@ -12,3 +12,6 @@ class TextPanel(QGroupBox):
 
     def text(self) -> str:
         return self._text_edit.toPlainText().strip()
+
+    def set_text(self, text: str) -> None:
+        self._text_edit.setPlainText(text)
