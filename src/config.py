@@ -13,6 +13,7 @@ DEFAULTS = {
     "ollama_host": "127.0.0.1",
     "ollama_port": 11434,
     "ollama_model": "",
+    "voice_profiles": {},
 }
 
 
