@@ -22,6 +22,9 @@ class OutputPanel(QGroupBox):
         self._player.setAudioOutput(self._audio_output)
         self._setup_ui()
         self._player.playbackStateChanged.connect(self._on_playback_state_changed)
+        self._player.errorOccurred.connect(
+            lambda err, msg: self._status_label.setText(f"Playback error: {msg}")
+        )
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -55,6 +58,8 @@ class OutputPanel(QGroupBox):
         self._progress.setVisible(generating)
         if generating:
             self._status_label.setText("Generating...")
+        else:
+            self._status_label.setText("")
 
     def set_output(self, path: str):
         self._last_output = path
