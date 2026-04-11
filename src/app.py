@@ -12,7 +12,7 @@ from src.widgets.text_panel import TextPanel
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("VoxCPM Voice Cloner")
+        self.setWindowTitle("Mockingbird")
         self.setMinimumWidth(620)
         self._cfg = config.load()
         self._worker: GenerationWorker | None = None

@@ -5,7 +5,7 @@ from src.app import MainWindow
 
 def main():
     app = QApplication(sys.argv)
-    app.setApplicationName("VoxCPM Voice Cloner")
+    app.setApplicationName("Mockingbird")
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
