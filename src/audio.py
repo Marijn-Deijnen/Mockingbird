@@ -1,3 +1,4 @@
+import re
 import subprocess
 from datetime import datetime
 from pathlib import Path
@@ -26,3 +27,18 @@ def output_path() -> str:
     OUTPUT_DIR.mkdir(exist_ok=True)
     timestamp = datetime.now().strftime("%Y-%m-%d_%H%M%S_%f")
     return str(OUTPUT_DIR / f"{timestamp}.wav")
+
+
+def rename_output(old_path: str, new_name: str) -> str:
+    """Rename an output file to new_name (no extension). Returns new absolute path."""
+    old = Path(old_path)
+    safe = re.sub(r'[<>:"/\\|?*]', "", new_name).strip()
+    if not safe:
+        return old_path
+    candidate = old.parent / f"{safe}.wav"
+    counter = 2
+    while candidate.exists() and candidate != old:
+        candidate = old.parent / f"{safe}_{counter}.wav"
+        counter += 1
+    old.rename(candidate)
+    return str(candidate)

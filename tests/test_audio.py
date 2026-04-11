@@ -59,3 +59,43 @@ def test_ensure_wav_skips_conversion_if_wav_exists(tmp_path):
 
     mock_run.assert_not_called()
     assert result == str(wav_file)
+
+
+def test_rename_output_renames_file(tmp_path):
+    from src.audio import rename_output
+    wav = tmp_path / "2026-04-11_220846_665320.wav"
+    wav.write_bytes(b"RIFF")
+    result = rename_output(str(wav), "happy_greeting")
+    assert result == str(tmp_path / "happy_greeting.wav")
+    assert Path(result).exists()
+    assert not wav.exists()
+
+
+def test_rename_output_avoids_collision(tmp_path):
+    from src.audio import rename_output
+    existing = tmp_path / "happy_greeting.wav"
+    existing.write_bytes(b"RIFF")
+    wav = tmp_path / "2026-04-11_220846_665320.wav"
+    wav.write_bytes(b"RIFF")
+    result = rename_output(str(wav), "happy_greeting")
+    assert result == str(tmp_path / "happy_greeting_2.wav")
+    assert Path(result).exists()
+    assert not wav.exists()
+
+
+def test_rename_output_strips_illegal_chars(tmp_path):
+    from src.audio import rename_output
+    wav = tmp_path / "2026-04-11_220846_665320.wav"
+    wav.write_bytes(b"RIFF")
+    result = rename_output(str(wav), 'test<>:"/\\|?*name')
+    assert Path(result).name == "testname.wav"
+    assert Path(result).exists()
+
+
+def test_rename_output_returns_old_path_on_empty_name(tmp_path):
+    from src.audio import rename_output
+    wav = tmp_path / "2026-04-11_220846_665320.wav"
+    wav.write_bytes(b"RIFF")
+    result = rename_output(str(wav), "   ")
+    assert result == str(wav)
+    assert wav.exists()
