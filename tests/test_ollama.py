@@ -40,3 +40,48 @@ def test_ollama_worker_attributes():
     assert w.host == "127.0.0.1"
     assert w.port == 11434
     assert w.model == "gemma4"
+
+
+def test_naming_worker_attributes():
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    app = QApplication.instance() or QApplication(sys.argv)
+    from src.ollama import NamingWorker
+    w = NamingWorker("hello world", "127.0.0.1", 11434, "gemma4")
+    assert w.text == "hello world"
+    assert w.host == "127.0.0.1"
+    assert w.port == 11434
+    assert w.model == "gemma4"
+
+
+def test_naming_worker_emits_sanitized_name():
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    from unittest.mock import patch, MagicMock
+    app = QApplication.instance() or QApplication(sys.argv)
+    from src.ollama import NamingWorker
+
+    received = []
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"response": "Hello World! Title"}
+    with patch("src.ollama.requests.post", return_value=mock_resp):
+        w = NamingWorker("some text", "127.0.0.1", 11434, "gemma4")
+        w.finished.connect(lambda name: received.append(name))
+        w.run()
+    assert received == ["hello_world_title"]
+
+
+def test_naming_worker_silent_on_error():
+    import sys
+    import requests as req
+    from PyQt6.QtWidgets import QApplication
+    from unittest.mock import patch
+    app = QApplication.instance() or QApplication(sys.argv)
+    from src.ollama import NamingWorker
+
+    received = []
+    with patch("src.ollama.requests.post", side_effect=req.RequestException("refused")):
+        w = NamingWorker("some text", "127.0.0.1", 11434, "gemma4")
+        w.finished.connect(lambda name: received.append(name))
+        w.run()
+    assert received == []

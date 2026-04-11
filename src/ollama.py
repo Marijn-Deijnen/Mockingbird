@@ -1,3 +1,5 @@
+import re
+
 import requests
 from PyQt6.QtCore import QThread, pyqtSignal
 
@@ -31,3 +33,38 @@ class OllamaWorker(QThread):
             self.finished.emit(response.json()["response"])
         except Exception as e:
             self.error.emit(str(e))
+
+
+class NamingWorker(QThread):
+    finished = pyqtSignal(str)  # sanitized suggested name, no extension
+
+    def __init__(self, text: str, host: str, port: int, model: str):
+        super().__init__()
+        self.text = text
+        self.host = host
+        self.port = port
+        self.model = model
+
+    def run(self):
+        try:
+            response = requests.post(
+                f"http://{self.host}:{self.port}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": (
+                        "Give a 3-5 word title for this text, suitable as a filename. "
+                        "No punctuation, no quotes. Only the title, nothing else. "
+                        f"Text: {self.text}"
+                    ),
+                    "stream": False,
+                },
+                timeout=30,
+            )
+            response.raise_for_status()
+            raw = response.json()["response"].strip()
+            name = re.sub(r"[^\w\s-]", "", raw).strip()
+            name = re.sub(r"\s+", "_", name).lower()
+            if name:
+                self.finished.emit(name)
+        except Exception:
+            return
