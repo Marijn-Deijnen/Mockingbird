@@ -63,7 +63,9 @@ class LibraryEntryWidget(QWidget):
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
         if reply == QMessageBox.StandardButton.Yes:
-            self.delete_requested.emit(self._entry["id"])
+            entry_id = self._entry.get("id", "")
+            if entry_id:
+                self.delete_requested.emit(entry_id)
 
 
 class LibraryPanel(QWidget):
