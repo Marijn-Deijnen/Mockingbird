@@ -15,13 +15,16 @@ DEFAULTS = {
 def load() -> dict:
     if not CONFIG_PATH.exists():
         return DEFAULTS.copy()
-    with open(CONFIG_PATH) as f:
-        data = json.load(f)
+    try:
+        with open(CONFIG_PATH, encoding="utf-8") as f:
+            data = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return DEFAULTS.copy()
     return {**DEFAULTS, **data}
 
 
 def save(cfg: dict) -> None:
-    with open(CONFIG_PATH, "w") as f:
+    with open(CONFIG_PATH, "w", encoding="utf-8") as f:
         json.dump(cfg, f, indent=2)
 
 
