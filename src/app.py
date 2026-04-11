@@ -48,7 +48,16 @@ class MainWindow(QMainWindow):
         self._cfg.update(values)
         config.save(self._cfg)
 
+    def closeEvent(self, event):
+        if self._worker is not None and self._worker.isRunning():
+            self._worker.quit()
+            self._worker.wait(3000)
+        super().closeEvent(event)
+
     def _on_generate(self):
+        if self._worker is not None and self._worker.isRunning():
+            return
+
         ref_path = self._ref_panel.current_path()
         text = self._text_panel.text()
 
@@ -78,6 +87,10 @@ class MainWindow(QMainWindow):
         self._worker.start()
 
     def _on_generation_done(self, wav, sample_rate: int):
-        out_path = audio.output_path()
-        sf.write(out_path, wav, sample_rate)
+        try:
+            out_path = audio.output_path()
+            sf.write(out_path, wav, sample_rate)
+        except Exception as e:
+            self._output_panel.show_error(f"Failed to save output file:\n{e}")
+            return
         self._output_panel.set_output(out_path)
