@@ -41,4 +41,4 @@ def rename_output(old_path: str, new_name: str) -> str:
         candidate = old.parent / f"{safe}_{counter}.wav"
         counter += 1
     old.rename(candidate)
-    return str(candidate)
+    return str(candidate.resolve())
