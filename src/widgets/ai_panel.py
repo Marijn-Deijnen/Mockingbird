@@ -82,11 +82,20 @@ class AIPanel(QGroupBox):
         self._worker.start()
 
     def _on_finished(self, text: str):
+        self._worker.wait()
         self._ask_btn.setEnabled(True)
         self._progress.setVisible(False)
         self.result_ready.emit(text)
 
     def _on_error(self, message: str):
+        self._worker.wait()
         self._ask_btn.setEnabled(True)
         self._progress.setVisible(False)
         self._status_label.setText(f"Error: {message}")
+
+    def closeEvent(self, event):
+        if self._worker is not None and self._worker.isRunning():
+            self._worker.quit()
+            if not self._worker.wait(3000):
+                self._worker.terminate()
+        super().closeEvent(event)

@@ -1,8 +1,10 @@
 import soundfile as sf
-from PyQt6.QtWidgets import QMainWindow, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QMainWindow, QMenuBar, QVBoxLayout, QWidget
 
 from src import audio, config
+from src.dialogs.settings_dialog import SettingsDialog
 from src.model import GenerationWorker
+from src.widgets.ai_panel import AIPanel
 from src.widgets.output_panel import OutputPanel
 from src.widgets.reference_panel import ReferencePanel
 from src.widgets.settings_panel import SettingsPanel
@@ -16,7 +18,15 @@ class MainWindow(QMainWindow):
         self.setMinimumWidth(620)
         self._cfg = config.load()
         self._worker: GenerationWorker | None = None
+        self._setup_menu()
         self._setup_ui()
+
+    def _setup_menu(self):
+        menu_bar = QMenuBar(self)
+        self.setMenuBar(menu_bar)
+        settings_menu = menu_bar.addMenu("Settings")
+        ai_action = settings_menu.addAction("AI Settings...")
+        ai_action.triggered.connect(self._open_settings_dialog)
 
     def _setup_ui(self):
         central = QWidget()
@@ -26,18 +36,41 @@ class MainWindow(QMainWindow):
         layout.setContentsMargins(14, 14, 14, 14)
 
         self._ref_panel = ReferencePanel(self._cfg)
+        self._ai_panel = AIPanel(
+            host=self._cfg.get("ollama_host", "127.0.0.1"),
+            port=self._cfg.get("ollama_port", 11434),
+            model=self._cfg.get("ollama_model", ""),
+        )
+        self._ai_panel.setVisible(self._cfg.get("ollama_enabled", False))
         self._text_panel = TextPanel()
         self._settings_panel = SettingsPanel(self._cfg)
         self._output_panel = OutputPanel()
 
         layout.addWidget(self._ref_panel)
+        layout.addWidget(self._ai_panel)
         layout.addWidget(self._text_panel)
         layout.addWidget(self._settings_panel)
         layout.addWidget(self._output_panel)
 
         self._ref_panel.reference_changed.connect(self._on_reference_changed)
+        self._ai_panel.result_ready.connect(self._text_panel.set_text)
         self._settings_panel.settings_changed.connect(self._on_settings_changed)
         self._output_panel.generate_requested.connect(self._on_generate)
+
+    def _open_settings_dialog(self):
+        dialog = SettingsDialog(self._cfg, parent=self)
+        dialog.settings_saved.connect(self._on_ai_settings_saved)
+        dialog.exec()
+
+    def _on_ai_settings_saved(self, values: dict):
+        self._cfg.update(values)
+        config.save(self._cfg)
+        self._ai_panel.setVisible(self._cfg["ollama_enabled"])
+        self._ai_panel.update_config(
+            self._cfg["ollama_host"],
+            self._cfg["ollama_port"],
+            self._cfg["ollama_model"],
+        )
 
     def _on_reference_changed(self, path: str):
         self._cfg = config.add_recent_reference(self._cfg, path)
