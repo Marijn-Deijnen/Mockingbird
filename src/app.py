@@ -215,7 +215,11 @@ class MainWindow(QMainWindow):
         self._output_panel.set_filename(name)
 
     def _on_file_renamed(self, old_path: str, new_name: str):
-        new_path = audio.rename_output(old_path, new_name)
+        try:
+            new_path = audio.rename_output(old_path, new_name)
+        except Exception as e:
+            self._output_panel.show_error(f"Failed to rename file:\n{e}")
+            return
         if new_path == old_path:
             return
         self._current_output_path = new_path
