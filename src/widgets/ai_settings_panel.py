@@ -1,6 +1,5 @@
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
-    QCheckBox,
     QComboBox,
     QFormLayout,
     QGroupBox,
@@ -14,6 +13,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src.ollama import fetch_models
+from src.widgets.toggle_switch import ToggleSwitch
 
 
 class AISettingsPanel(QWidget):
@@ -31,26 +31,18 @@ class AISettingsPanel(QWidget):
         # --- AI Prompt visibility ---
         prompt_group = QGroupBox("Generate Tab")
         prompt_form = QFormLayout(prompt_group)
-        show_prompt_widget = QWidget()
-        show_prompt_row = QHBoxLayout(show_prompt_widget)
-        show_prompt_row.setContentsMargins(0, 0, 0, 0)
-        self._show_prompt_check = QCheckBox()
-        show_prompt_row.addWidget(self._show_prompt_check)
-        show_prompt_row.addStretch()
-        prompt_form.addRow("Show AI Prompt panel", show_prompt_widget)
+        self._show_prompt_toggle = ToggleSwitch()
+        self._show_prompt_toggle.setChecked(cfg.get("show_ai_prompt", True))
+        prompt_form.addRow("Show AI Prompt panel", self._show_prompt_toggle)
         outer.addWidget(prompt_group)
 
         # --- Ollama connection ---
         ollama_group = QGroupBox("AI Assistant (Ollama)")
         form = QFormLayout(ollama_group)
 
-        enabled_widget = QWidget()
-        enabled_row = QHBoxLayout(enabled_widget)
-        enabled_row.setContentsMargins(0, 0, 0, 0)
-        self._enabled_check = QCheckBox()
-        enabled_row.addWidget(self._enabled_check)
-        enabled_row.addStretch()
-        form.addRow("Enable AI features", enabled_widget)
+        self._enabled_toggle = ToggleSwitch()
+        self._enabled_toggle.setChecked(cfg.get("ollama_enabled", False))
+        form.addRow("Enable AI features", self._enabled_toggle)
 
         self._host_edit = QLineEdit(cfg.get("ollama_host", "127.0.0.1"))
         form.addRow("Host", self._host_edit)
@@ -77,19 +69,19 @@ class AISettingsPanel(QWidget):
         outer.addStretch()
 
         self._connect_btn.clicked.connect(self._on_connect)
-        self._show_prompt_check.toggled.connect(self._emit)
-        self._enabled_check.toggled.connect(self._emit)
+        self._show_prompt_toggle.toggled.connect(self._emit)
+        self._enabled_toggle.toggled.connect(self._emit)
         self._host_edit.editingFinished.connect(self._emit)
         self._port_spin.valueChanged.connect(self._emit)
         self._model_combo.currentTextChanged.connect(self._emit)
 
     def values(self) -> dict:
         return {
-            "ollama_enabled": self._enabled_check.isChecked(),
+            "ollama_enabled": self._enabled_toggle.isChecked(),
             "ollama_host": self._host_edit.text().strip(),
             "ollama_port": self._port_spin.value(),
             "ollama_model": self._model_combo.currentText(),
-            "show_ai_prompt": self._show_prompt_check.isChecked(),
+            "show_ai_prompt": self._show_prompt_toggle.isChecked(),
         }
 
     def _emit(self, _=None):
