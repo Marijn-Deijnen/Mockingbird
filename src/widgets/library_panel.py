@@ -18,6 +18,14 @@ from PyQt6.QtWidgets import (
 from src.audio import OUTPUT_DIR
 
 
+def _col_sep() -> QWidget:
+    """1px vertical column separator."""
+    sep = QWidget()
+    sep.setFixedWidth(1)
+    sep.setObjectName("colSep")
+    return sep
+
+
 def filter_entries(
     entries: list[dict], search: str, voice: str, sort: str
 ) -> list[dict]:
@@ -62,7 +70,8 @@ class LibraryEntryWidget(QWidget):
         self._update_object_name()
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 2, 4, 2)
+        layout.setContentsMargins(8, 4, 8, 4)
+        layout.setSpacing(0)
 
         filename_label = QLabel(entry.get("filename", ""))
         filename_label.setFixedWidth(160)
@@ -83,8 +92,15 @@ class LibraryEntryWidget(QWidget):
         )
 
         layout.addWidget(filename_label)
+        layout.addSpacing(8)
+        layout.addWidget(_col_sep())
+        layout.addSpacing(8)
         layout.addWidget(voice_label)
+        layout.addSpacing(8)
+        layout.addWidget(_col_sep())
+        layout.addSpacing(8)
         layout.addWidget(text_label, stretch=1)
+        layout.addSpacing(4)
         layout.addWidget(play_btn)
 
     def set_selected(self, selected: bool) -> None:
@@ -261,15 +277,19 @@ class LibraryPanel(QWidget):
         header = QWidget()
         header.setObjectName("libraryHeader")
         header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(4, 2, 4, 2)
+        header_layout.setContentsMargins(8, 2, 8, 2)
+        header_layout.setSpacing(0)
         for col_text, fixed_w in [("Title", 160), ("Voice", 110), ("Description", 0)]:
             lbl = QLabel(f"<b>{col_text}</b>")
             if fixed_w:
                 lbl.setFixedWidth(fixed_w)
+                header_layout.addWidget(lbl)
+                header_layout.addSpacing(8)
+                header_layout.addWidget(_col_sep())
+                header_layout.addSpacing(8)
             else:
                 header_layout.addWidget(lbl, stretch=1)
-                continue
-            header_layout.addWidget(lbl)
+        header_layout.addSpacing(4)
         header_layout.addSpacing(40)  # align with play button column
         layout.addWidget(header)
 

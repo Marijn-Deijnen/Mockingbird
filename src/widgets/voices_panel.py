@@ -22,6 +22,14 @@ from src import voices
 from src.voices import VOICES_DIR
 
 
+def _col_sep() -> QWidget:
+    """1px vertical column separator."""
+    sep = QWidget()
+    sep.setFixedWidth(1)
+    sep.setObjectName("colSep")
+    return sep
+
+
 class VoiceEntryWidget(QWidget):
     play_requested = pyqtSignal(str)         # filename
     rename_requested = pyqtSignal(str, str)  # voice_id, new_display_name
@@ -36,7 +44,8 @@ class VoiceEntryWidget(QWidget):
         )
 
         layout = QHBoxLayout(self)
-        layout.setContentsMargins(4, 2, 4, 2)
+        layout.setContentsMargins(8, 4, 8, 4)
+        layout.setSpacing(0)
 
         self._name_label = QLabel(self._display_name)
         self._name_label.setFixedWidth(180)
@@ -71,7 +80,13 @@ class VoiceEntryWidget(QWidget):
 
         layout.addWidget(self._name_label)
         layout.addWidget(self._name_edit)
+        layout.addSpacing(8)
+        layout.addWidget(_col_sep())
+        layout.addSpacing(8)
         layout.addWidget(file_label)
+        layout.addSpacing(8)
+        layout.addWidget(_col_sep())
+        layout.addSpacing(8)
         layout.addWidget(format_label)
         layout.addStretch()
         layout.addWidget(play_btn)
@@ -137,14 +152,18 @@ class VoicesPanel(QWidget):
         header = QWidget()
         header.setObjectName("libraryHeader")
         header_layout = QHBoxLayout(header)
-        header_layout.setContentsMargins(4, 2, 4, 2)
+        header_layout.setContentsMargins(8, 2, 8, 2)
+        header_layout.setSpacing(0)
         for col_text, fixed_w in [("Name", 180), ("File", 160), ("Format", 50)]:
             lbl = QLabel(f"<b>{col_text}</b>")
             lbl.setFixedWidth(fixed_w)
             header_layout.addWidget(lbl)
+            header_layout.addSpacing(8)
+            header_layout.addWidget(_col_sep())
+            header_layout.addSpacing(8)
         header_layout.addStretch()
-        # 3 buttons × 32px + 2 gaps × ~6px + 4px right margin ≈ 112px
-        header_layout.addSpacing(112)
+        # 3 buttons × 32px = 96px + margins
+        header_layout.addSpacing(96)
         layout.addWidget(header)
 
         # Scroll area

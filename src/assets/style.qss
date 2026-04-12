@@ -440,15 +440,22 @@ QWidget#libraryHeader {
     padding-bottom: 4px;
 }
 
+/* --- List column separators -------------------------------- */
+QWidget#colSep {
+    background-color: #2a2f3a;
+}
+
 /* --- Library rows ------------------------------------------ */
 QWidget#libraryRowEven {
     background-color: #22262e;
     border-radius: 0;
+    border-bottom: 1px solid #252830;
 }
 
 QWidget#libraryRowOdd {
     background-color: #1e2128;
     border-radius: 0;
+    border-bottom: 1px solid #252830;
 }
 
 QWidget#libraryRowEven:hover,
@@ -486,6 +493,7 @@ QWidget#libraryDetail {
 QWidget#libraryRowSelected {
     background-color: #313848;
     border-radius: 0;
+    border-bottom: 1px solid #252830;
 }
 
 /* --- Library playing indicator ---------------------------- */
