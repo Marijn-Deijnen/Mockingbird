@@ -103,6 +103,11 @@ QPushButton#navBtn:hover:!checked {
     color: #c8c0b5;
 }
 
+QPushButton#navBtn:focus:!checked {
+    color: #e8e0d5;
+    border-bottom: 2px solid #8a93a8;
+}
+
 /* --- Standard buttons -------------------------------------- */
 /* Sharp-edged functional controls — not floating pills */
 QPushButton {
@@ -117,6 +122,11 @@ QPushButton {
 QPushButton:hover {
     background-color: #313848;
     border-color: #4a5268;
+}
+
+QPushButton:focus {
+    border-color: #e8a838;
+    background-color: #313848;
 }
 
 QPushButton:pressed {
@@ -147,7 +157,7 @@ QPushButton[flat="true"]:hover {
 QPushButton#generateBtn {
     background-color: #e8a838;
     color: #1a1d23;
-    border: none;
+    border: 1px solid transparent;
     border-radius: 2px;
     font-weight: 700;
     font-size: 13px;
@@ -159,6 +169,11 @@ QPushButton#generateBtn:hover {
     background-color: #f0b84a;
 }
 
+QPushButton#generateBtn:focus {
+    border-color: #ffffff;
+    background-color: #f0b84a;
+}
+
 QPushButton#generateBtn:pressed {
     background-color: #d09428;
 }
@@ -166,6 +181,7 @@ QPushButton#generateBtn:pressed {
 QPushButton#generateBtn:disabled {
     background-color: #5a4a20;
     color: #7a6030;
+    border-color: transparent;
 }
 
 /* --- Text inputs ------------------------------------------- */
@@ -181,6 +197,13 @@ QDoubleSpinBox {
     min-height: 24px;
     selection-background-color: #e8a838;
     selection-color: #1a1d23;
+}
+
+QLineEdit:hover,
+QPlainTextEdit:hover,
+QSpinBox:hover,
+QDoubleSpinBox:hover {
+    border-color: #4a5268;
 }
 
 QLineEdit:focus,
@@ -240,6 +263,11 @@ QComboBox {
     border-radius: 2px;
     padding: 4px 8px;
     min-height: 26px;
+}
+
+QComboBox:hover {
+    background-color: #313848;
+    border-color: #4a5268;
 }
 
 QComboBox:focus {
@@ -312,6 +340,11 @@ QCheckBox::indicator:checked {
 
 QCheckBox::indicator:hover {
     border-color: #e8a838;
+}
+
+QCheckBox:focus::indicator {
+    border-color: #e8a838;
+    background-color: #313848;
 }
 
 /* --- Progress bar ------------------------------------------ */

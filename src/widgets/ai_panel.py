@@ -45,6 +45,7 @@ class AIPanel(QGroupBox):
         layout.addLayout(controls)
 
         self._status_label = QLabel("")
+        self._status_label.setObjectName("statusLabel")
         layout.addWidget(self._status_label)
 
         self._ask_btn.clicked.connect(self._on_ask)
@@ -57,11 +58,13 @@ class AIPanel(QGroupBox):
     def _on_ask(self):
         prompt = self._prompt_edit.toPlainText().strip()
         if not prompt:
-            self._status_label.setText("Please enter a prompt.")
+            self._status_label.setText(
+                '<span style="color: #e05c5c;">Please enter a prompt.</span>'
+            )
             return
         if not self._model:
             self._status_label.setText(
-                "No model selected. Open Settings → AI Settings to connect."
+                '<span style="color: #e05c5c;">No model selected. Open Settings → AI Settings to connect.</span>'
             )
             return
         if self._worker is not None and self._worker.isRunning():
@@ -69,7 +72,7 @@ class AIPanel(QGroupBox):
 
         self._ask_btn.setEnabled(False)
         self._progress.setVisible(True)
-        self._status_label.setText("")
+        self._status_label.clear()
 
         self._worker = OllamaWorker(
             text=prompt,
@@ -91,7 +94,9 @@ class AIPanel(QGroupBox):
         self._worker.wait()
         self._ask_btn.setEnabled(True)
         self._progress.setVisible(False)
-        self._status_label.setText(f"Error: {message}")
+        self._status_label.setText(
+            f'<span style="color: #e05c5c;">Error: {message}</span>'
+        )
 
     def closeEvent(self, event):
         if self._worker is not None and self._worker.isRunning():
