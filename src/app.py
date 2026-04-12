@@ -19,7 +19,7 @@ from src.widgets.library_panel import LibraryPanel
 from src.widgets.voices_panel import VoicesPanel
 from src.widgets.nav_bar import NavBar
 from src.widgets.output_panel import OutputPanel
-from src.widgets.reference_panel import ReferencePanel
+from src.widgets.voice_selector import VoiceSelector
 from src.widgets.settings_panel import SettingsPanel
 from src.widgets.text_panel import TextPanel
 
@@ -63,7 +63,10 @@ class MainWindow(QMainWindow):
         gen_layout.setSpacing(0)
         gen_layout.setContentsMargins(14, 0, 14, 14)
 
-        self._ref_panel = ReferencePanel(self._cfg)
+        self._voice_selector = VoiceSelector()
+        self._voice_selector.refresh(voices.load())
+        if self._cfg.get("last_voice_id"):
+            self._voice_selector.select_by_id(self._cfg["last_voice_id"])
         self._ai_panel = AIPanel(
             host=self._cfg.get("ollama_host", "127.0.0.1"),
             port=self._cfg.get("ollama_port", 11434),
@@ -74,7 +77,7 @@ class MainWindow(QMainWindow):
         self._settings_panel = SettingsPanel(self._cfg)
         self._output_panel = OutputPanel()
 
-        gen_layout.addWidget(self._ref_panel)
+        gen_layout.addWidget(self._voice_selector)
         gen_layout.addWidget(self._ai_panel)
         gen_layout.addWidget(self._text_panel)
         gen_layout.addWidget(self._settings_panel)
@@ -93,7 +96,8 @@ class MainWindow(QMainWindow):
 
         # Wiring
         self._nav_bar.view_changed.connect(self._stack.setCurrentIndex)
-        self._ref_panel.reference_changed.connect(self._on_reference_changed)
+        self._voice_selector.voice_changed.connect(self._on_voice_changed)
+        self._voices_panel.voices_changed.connect(self._voice_selector.refresh)
         self._ai_panel.result_ready.connect(self._text_panel.set_text)
         self._settings_panel.settings_changed.connect(self._on_settings_changed)
         self._output_panel.generate_requested.connect(self._on_generate)
@@ -116,12 +120,10 @@ class MainWindow(QMainWindow):
             self._cfg["ollama_model"],
         )
 
-    def _on_reference_changed(self, path: str):
-        self._cfg = config.add_recent_reference(self._cfg, path)
+    def _on_voice_changed(self, voice_id: str, path: str) -> None:
+        self._cfg["last_voice_id"] = voice_id
         config.save(self._cfg)
-        self._ref_panel.update_recents(self._cfg)
-
-        profile = self._cfg["voice_profiles"].get(path)
+        profile = self._cfg["voice_profiles"].get(voice_id)
         if profile:
             self._settings_panel.set_values(
                 profile["cfg_value"],
@@ -133,9 +135,9 @@ class MainWindow(QMainWindow):
 
     def _on_settings_changed(self, values: dict):
         self._cfg.update(values)
-        current_voice = self._ref_panel.current_path()
-        if current_voice:
-            self._cfg["voice_profiles"][current_voice] = {
+        current_voice_id = self._voice_selector.current_voice_id()
+        if current_voice_id:
+            self._cfg["voice_profiles"][current_voice_id] = {
                 "cfg_value": values["cfg_value"],
                 "inference_timesteps": values["inference_timesteps"],
                 "use_denoiser": values["use_denoiser"],
@@ -153,11 +155,11 @@ class MainWindow(QMainWindow):
         if self._worker is not None and self._worker.isRunning():
             return
 
-        ref_path = self._ref_panel.current_path()
+        ref_path = self._voice_selector.current_path()
         text = self._text_panel.text()
 
         if not ref_path:
-            self._output_panel.show_warning("Please select a reference audio file.")
+            self._output_panel.show_warning("Please select a voice.")
             return
         if not text:
             self._output_panel.show_warning("Please enter text to speak.")
@@ -193,7 +195,7 @@ class MainWindow(QMainWindow):
         self._current_output_id = Path(out_path).stem
 
         text = self._text_panel.text()
-        ref_path = self._ref_panel.current_path()
+        ref_path = self._voice_selector.current_path()
 
         entry = {
             "id": self._current_output_id,

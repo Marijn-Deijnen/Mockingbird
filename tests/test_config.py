@@ -1,7 +1,5 @@
 import json
-import os
 import pytest
-from pathlib import Path
 
 
 @pytest.fixture
@@ -18,8 +16,7 @@ def test_load_defaults_when_no_file(tmp_config):
     assert result["cfg_value"] == 2.0
     assert result["inference_timesteps"] == 10
     assert result["use_denoiser"] is False
-    assert result["last_reference"] == ""
-    assert result["recent_references"] == []
+    assert result["last_voice_id"] == ""
 
 
 def test_load_merges_with_defaults(tmp_config):
@@ -39,38 +36,12 @@ def test_save_and_reload(tmp_config):
     assert reloaded["cfg_value"] == 3.5
 
 
-def test_add_recent_reference_prepends(tmp_config):
-    import src.config as cfg_mod
-    cfg = cfg_mod.load()
-    cfg = cfg_mod.add_recent_reference(cfg, "/audio/a.wav")
-    cfg = cfg_mod.add_recent_reference(cfg, "/audio/b.wav")
-    assert cfg["recent_references"][0] == "/audio/b.wav"
-    assert cfg["recent_references"][1] == "/audio/a.wav"
-    assert cfg["last_reference"] == "/audio/b.wav"
-
-
-def test_add_recent_reference_deduplicates(tmp_config):
-    import src.config as cfg_mod
-    cfg = cfg_mod.load()
-    cfg = cfg_mod.add_recent_reference(cfg, "/audio/a.wav")
-    cfg = cfg_mod.add_recent_reference(cfg, "/audio/a.wav")
-    assert cfg["recent_references"].count("/audio/a.wav") == 1
-
-
-def test_add_recent_reference_caps_at_10(tmp_config):
-    import src.config as cfg_mod
-    cfg = cfg_mod.load()
-    for i in range(12):
-        cfg = cfg_mod.add_recent_reference(cfg, f"/audio/{i}.wav")
-    assert len(cfg["recent_references"]) == 10
-
-
 def test_load_returns_defaults_on_corrupted_file(tmp_config):
     import src.config as cfg_mod
     tmp_config.write_bytes(b"not valid json{{{{")
     result = cfg_mod.load()
     assert result["cfg_value"] == 2.0
-    assert result["recent_references"] == []
+    assert result["last_voice_id"] == ""
 
 
 def test_load_includes_ollama_defaults(tmp_config):
