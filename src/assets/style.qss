@@ -469,3 +469,28 @@ QToolTip {
     padding: 4px 8px;
     border-radius: 2px;
 }
+
+/* --- Library toolbar -------------------------------------- */
+QWidget#libraryToolbar {
+    border-bottom: 1px solid #2a2f3a;
+    padding-bottom: 6px;
+}
+
+/* --- Library detail panel --------------------------------- */
+QWidget#libraryDetail {
+    border-top: 1px solid #3a4150;
+    padding-top: 6px;
+}
+
+/* --- Library selected row --------------------------------- */
+QWidget#libraryRowSelected {
+    background-color: #313848;
+    border-radius: 0;
+}
+
+/* --- Library playing indicator ---------------------------- */
+QLabel#libraryPlayingIndicator {
+    color: #e8a838;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 10px;
+}
