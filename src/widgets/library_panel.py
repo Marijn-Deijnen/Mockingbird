@@ -146,7 +146,7 @@ class LibraryPanel(QWidget):
             lbl.setMinimumWidth(min_width)
             header_layout.addWidget(lbl)
         header_layout.addStretch()
-        # Spacer to align with play/delete buttons (32 + 32 + spacing)
+        # Spacer to align with play button (32 + spacing)
         header_layout.addSpacing(72)
         layout.addWidget(header)
 
