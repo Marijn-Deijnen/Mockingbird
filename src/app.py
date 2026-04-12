@@ -93,6 +93,7 @@ class MainWindow(QMainWindow):
         self._output_panel.generate_requested.connect(self._on_generate)
         self._output_panel.file_renamed.connect(self._on_file_renamed)
         self._library_panel.entry_deleted.connect(self._on_library_entry_deleted)
+        self._library_panel.file_renamed.connect(self._on_file_renamed)
 
     def _open_settings_dialog(self):
         dialog = SettingsDialog(self._cfg, parent=self)
