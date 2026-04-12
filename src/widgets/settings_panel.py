@@ -50,8 +50,13 @@ class SettingsPanel(QGroupBox):
         layout.addRow("Inference Steps", steps_widget)
 
         # --- Denoiser ---
+        denoiser_widget = QWidget()
+        denoiser_row = QHBoxLayout(denoiser_widget)
+        denoiser_row.setContentsMargins(0, 0, 0, 0)
         self._denoiser_check = QCheckBox()
-        layout.addRow("Use Denoiser", self._denoiser_check)
+        denoiser_row.addWidget(self._denoiser_check)
+        denoiser_row.addStretch()
+        layout.addRow("Use Denoiser", denoiser_widget)
 
         # Set initial values (block signals to avoid spurious saves on startup)
         self._cfg_spin.blockSignals(True)
