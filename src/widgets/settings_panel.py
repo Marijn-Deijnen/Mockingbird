@@ -54,6 +54,7 @@ class SettingsPanel(QGroupBox):
         denoiser_row = QHBoxLayout(denoiser_widget)
         denoiser_row.setContentsMargins(0, 0, 0, 0)
         self._denoiser_check = QCheckBox()
+        self._denoiser_check.setFixedWidth(18)
         denoiser_row.addWidget(self._denoiser_check)
         denoiser_row.addStretch()
         layout.addRow("Use Denoiser", denoiser_widget)
