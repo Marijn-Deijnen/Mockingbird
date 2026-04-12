@@ -10,6 +10,7 @@ from PyQt6.QtWidgets import (
 )
 
 from src import audio, config, library, voices
+from src.version import __version__
 from src.model import GenerationWorker, preload_model
 from src.ollama import NamingWorker
 from src.widgets.ai_panel import AIPanel
@@ -26,7 +27,7 @@ from src.widgets.voice_selector import VoiceSelector
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("Mockingbird")
+        self.setWindowTitle(f"Mockingbird v{__version__}")
         self.setMinimumWidth(760)
         self._cfg = config.load()
         self._worker: GenerationWorker | None = None

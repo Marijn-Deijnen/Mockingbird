@@ -11,6 +11,7 @@
 [![Model](https://img.shields.io/badge/Model-VoxCPM2-e8a838?style=flat-square)](https://github.com/OpenBMB/VoxCPM)
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078d4?style=flat-square&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![Offline](https://img.shields.io/badge/Runs-100%25%20Locally-success?style=flat-square)](#)
+[![Release](https://img.shields.io/github/v/release/Marijn-Deijnen/Mockingbird?style=flat-square&label=Download&color=e8a838)](https://github.com/Marijn-Deijnen/Mockingbird/releases/latest)
 
 </div>
 
@@ -34,6 +35,14 @@ Mockingbird is a desktop GUI for reference-based voice cloning. Import any short
 | ⚡ | **Model caching** | Model loads once at startup and stays warm — no reload delay |
 | 🖥️ | **GPU acceleration** | CUDA used automatically when available, falls back to CPU |
 | 🤖 | **AI assistant** | Optional Ollama integration for prompt generation and auto-naming |
+
+---
+
+## Download
+
+Pre-built Windows executables are available on the [Releases page](https://github.com/Marijn-Deijnen/Mockingbird/releases/latest). Download the latest `Mockingbird-vX.X.X.zip`, extract it, and run `Mockingbird.exe` — no Python install required.
+
+> **Note:** The VoxCPM2 model weights (~2 GB) are downloaded automatically on first launch and cached locally. An internet connection is only needed for this one-time download.
 
 ---
 
