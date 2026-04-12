@@ -4,24 +4,23 @@ from pathlib import Path
 import soundfile as sf
 from PyQt6.QtWidgets import (
     QMainWindow,
-    QMenuBar,
     QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
 
 from src import audio, config, library, voices
-from src.dialogs.settings_dialog import SettingsDialog
 from src.model import GenerationWorker, preload_model
 from src.ollama import NamingWorker
 from src.widgets.ai_panel import AIPanel
+from src.widgets.ai_settings_panel import AISettingsPanel
 from src.widgets.library_panel import LibraryPanel
 from src.widgets.voices_panel import VoicesPanel
 from src.widgets.nav_bar import NavBar
 from src.widgets.output_panel import OutputPanel
-from src.widgets.voice_selector import VoiceSelector
 from src.widgets.settings_panel import SettingsPanel
 from src.widgets.text_panel import TextPanel
+from src.widgets.voice_selector import VoiceSelector
 
 
 class MainWindow(QMainWindow):
@@ -34,16 +33,8 @@ class MainWindow(QMainWindow):
         self._naming_worker: NamingWorker | None = None
         self._current_output_path: str | None = None
         self._current_output_id: str | None = None
-        self._setup_menu()
         self._setup_ui()
         preload_model(self._cfg.get("use_denoiser", False))
-
-    def _setup_menu(self):
-        menu_bar = QMenuBar(self)
-        self.setMenuBar(menu_bar)
-        settings_menu = menu_bar.addMenu("Settings")
-        ai_action = settings_menu.addAction("AI Settings...")
-        ai_action.triggered.connect(self._open_settings_dialog)
 
     def _setup_ui(self):
         central = QWidget()
@@ -73,7 +64,10 @@ class MainWindow(QMainWindow):
             port=self._cfg.get("ollama_port", 11434),
             model=self._cfg.get("ollama_model", ""),
         )
-        self._ai_panel.setVisible(self._cfg.get("ollama_enabled", False))
+        self._ai_panel.setVisible(
+            self._cfg.get("ollama_enabled", False)
+            and self._cfg.get("show_ai_prompt", True)
+        )
         self._text_panel = TextPanel()
         self._settings_panel = SettingsPanel(self._cfg)
         self._output_panel = OutputPanel()
@@ -95,6 +89,10 @@ class MainWindow(QMainWindow):
         self._voices_panel.load_voices(voices.load())
         self._stack.addWidget(self._voices_panel)
 
+        # Page 3: Settings view
+        self._ai_settings_panel = AISettingsPanel(self._cfg)
+        self._stack.addWidget(self._ai_settings_panel)
+
         # Wiring
         self._nav_bar.view_changed.connect(self._stack.setCurrentIndex)
         self._voice_selector.voice_changed.connect(self._on_voice_changed)
@@ -105,20 +103,18 @@ class MainWindow(QMainWindow):
         self._output_panel.file_renamed.connect(self._on_file_renamed)
         self._library_panel.entry_deleted.connect(self._on_library_entry_deleted)
         self._library_panel.file_renamed.connect(self._on_file_renamed)
+        self._ai_settings_panel.settings_changed.connect(self._on_ai_settings_changed)
 
-    def _open_settings_dialog(self):
-        dialog = SettingsDialog(self._cfg, parent=self)
-        dialog.settings_saved.connect(self._on_ai_settings_saved)
-        dialog.exec()
-
-    def _on_ai_settings_saved(self, values: dict):
+    def _on_ai_settings_changed(self, values: dict):
         self._cfg.update(values)
         config.save(self._cfg)
-        self._ai_panel.setVisible(self._cfg["ollama_enabled"])
+        self._ai_panel.setVisible(
+            values["ollama_enabled"] and values["show_ai_prompt"]
+        )
         self._ai_panel.update_config(
-            self._cfg["ollama_host"],
-            self._cfg["ollama_port"],
-            self._cfg["ollama_model"],
+            values["ollama_host"],
+            values["ollama_port"],
+            values["ollama_model"],
         )
 
     def _on_voice_changed(self, voice_id: str, path: str) -> None:

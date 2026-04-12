@@ -2,35 +2,47 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
-    QDialog,
     QFormLayout,
+    QGroupBox,
     QHBoxLayout,
     QLabel,
     QLineEdit,
     QPushButton,
     QSpinBox,
     QVBoxLayout,
+    QWidget,
 )
 
 from src.ollama import fetch_models
 
 
-class SettingsDialog(QDialog):
-    settings_saved = pyqtSignal(dict)
+class AISettingsPanel(QWidget):
+    settings_changed = pyqtSignal(dict)
 
     def __init__(self, cfg: dict, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("AI Settings")
-        self.setMinimumWidth(340)
         self._setup_ui(cfg)
 
     def _setup_ui(self, cfg: dict):
-        layout = QVBoxLayout(self)
-        form = QFormLayout()
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(14, 14, 14, 14)
+        outer.setSpacing(12)
+
+        # --- AI Prompt visibility ---
+        prompt_group = QGroupBox("Generate Tab")
+        prompt_form = QFormLayout(prompt_group)
+        self._show_prompt_check = QCheckBox()
+        self._show_prompt_check.setChecked(cfg.get("show_ai_prompt", True))
+        prompt_form.addRow("Show AI Prompt panel", self._show_prompt_check)
+        outer.addWidget(prompt_group)
+
+        # --- Ollama connection ---
+        ollama_group = QGroupBox("AI Assistant (Ollama)")
+        form = QFormLayout(ollama_group)
 
         self._enabled_check = QCheckBox()
         self._enabled_check.setChecked(cfg.get("ollama_enabled", False))
-        form.addRow("Enable AI Assistant", self._enabled_check)
+        form.addRow("Enable AI features", self._enabled_check)
 
         self._host_edit = QLineEdit(cfg.get("ollama_host", "127.0.0.1"))
         form.addRow("Host", self._host_edit)
@@ -53,19 +65,27 @@ class SettingsDialog(QDialog):
             self._model_combo.addItem(cfg["ollama_model"])
         form.addRow("Model", self._model_combo)
 
-        layout.addLayout(form)
-
-        btn_row = QHBoxLayout()
-        self._cancel_btn = QPushButton("Cancel")
-        self._save_btn = QPushButton("Save")
-        btn_row.addStretch()
-        btn_row.addWidget(self._cancel_btn)
-        btn_row.addWidget(self._save_btn)
-        layout.addLayout(btn_row)
+        outer.addWidget(ollama_group)
+        outer.addStretch()
 
         self._connect_btn.clicked.connect(self._on_connect)
-        self._cancel_btn.clicked.connect(self.reject)
-        self._save_btn.clicked.connect(self._on_save)
+        self._show_prompt_check.toggled.connect(self._emit)
+        self._enabled_check.toggled.connect(self._emit)
+        self._host_edit.editingFinished.connect(self._emit)
+        self._port_spin.valueChanged.connect(self._emit)
+        self._model_combo.currentTextChanged.connect(self._emit)
+
+    def values(self) -> dict:
+        return {
+            "ollama_enabled": self._enabled_check.isChecked(),
+            "ollama_host": self._host_edit.text().strip(),
+            "ollama_port": self._port_spin.value(),
+            "ollama_model": self._model_combo.currentText(),
+            "show_ai_prompt": self._show_prompt_check.isChecked(),
+        }
+
+    def _emit(self, _=None):
+        self.settings_changed.emit(self.values())
 
     def _on_connect(self):
         self._connect_label.setText("")
@@ -75,17 +95,8 @@ class SettingsDialog(QDialog):
             )
             self._model_combo.clear()
             self._model_combo.addItems(models)
-            self._connect_label.setStyleSheet("color: green;")
+            self._connect_label.setStyleSheet("color: #6ec97e;")
             self._connect_label.setText(f"{len(models)} model(s) found")
         except Exception as e:
-            self._connect_label.setStyleSheet("color: red;")
+            self._connect_label.setStyleSheet("color: #e05c5c;")
             self._connect_label.setText(f"Failed: {e}")
-
-    def _on_save(self):
-        self.settings_saved.emit({
-            "ollama_enabled": self._enabled_check.isChecked(),
-            "ollama_host": self._host_edit.text().strip(),
-            "ollama_port": self._port_spin.value(),
-            "ollama_model": self._model_combo.currentText(),
-        })
-        self.accept()

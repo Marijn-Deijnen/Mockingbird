@@ -51,6 +51,7 @@ def test_load_includes_ollama_defaults(tmp_config):
     assert result["ollama_host"] == "127.0.0.1"
     assert result["ollama_port"] == 11434
     assert result["ollama_model"] == ""
+    assert result["show_ai_prompt"] is True
 
 
 def test_load_includes_voice_profiles_default(tmp_config):
