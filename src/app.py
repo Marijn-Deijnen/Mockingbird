@@ -10,12 +10,13 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-from src import audio, config, library
+from src import audio, config, library, voices
 from src.dialogs.settings_dialog import SettingsDialog
 from src.model import GenerationWorker
 from src.ollama import NamingWorker
 from src.widgets.ai_panel import AIPanel
 from src.widgets.library_panel import LibraryPanel
+from src.widgets.voices_panel import VoicesPanel
 from src.widgets.nav_bar import NavBar
 from src.widgets.output_panel import OutputPanel
 from src.widgets.reference_panel import ReferencePanel
@@ -84,6 +85,11 @@ class MainWindow(QMainWindow):
         self._library_panel = LibraryPanel()
         self._library_panel.load_entries(library.load())
         self._stack.addWidget(self._library_panel)
+
+        # Page 2: Voices view
+        self._voices_panel = VoicesPanel()
+        self._voices_panel.load_voices(voices.load())
+        self._stack.addWidget(self._voices_panel)
 
         # Wiring
         self._nav_bar.view_changed.connect(self._stack.setCurrentIndex)
