@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Mockingbird")
-        self.setMinimumWidth(620)
+        self.setMinimumWidth(760)
         self._cfg = config.load()
         self._worker: GenerationWorker | None = None
         self._naming_worker: NamingWorker | None = None
