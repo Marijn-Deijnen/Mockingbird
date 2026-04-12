@@ -71,7 +71,7 @@ QGroupBox::title {
     subcontrol-position: top left;
     padding: 0 4px;
     left: 8px;
-    top: -1px;
+    top: 2px;
 }
 
 /* --- Nav bar ----------------------------------------------- */
@@ -313,7 +313,7 @@ QSlider::sub-page:horizontal {
 
 QSlider::handle:horizontal {
     background-color: #e8e0d5;
-    border: 2px solid #1a1d23;
+    border: 2px solid #1c1f25;
     width: 12px;
     height: 12px;
     margin: -4px 0;
@@ -353,18 +353,20 @@ QCheckBox:focus::indicator {
 }
 
 /* --- Progress bar ------------------------------------------ */
+/* No border — at max-height: 4px a 1px border consumed 50%+ of height.
+   Track contrast (#2a2f3a on #1c1f25 surface) is sufficient without border. */
 QProgressBar {
     background-color: #2a2f3a;
-    border: 1px solid #3a4150;
-    border-radius: 1px;
-    max-height: 3px;
+    border: none;
+    border-radius: 2px;
+    max-height: 4px;
     text-align: center;
     color: transparent;
 }
 
 QProgressBar::chunk {
     background-color: #e8a838;
-    border-radius: 1px;
+    border-radius: 2px;
 }
 
 /* --- Scroll bars ------------------------------------------- */
@@ -426,7 +428,13 @@ QLabel#errorLabel {
     font-weight: 400;
 }
 
-/* --- Library header ---------------------------------------- */
+/* --- Library zones ----------------------------------------- */
+/* Filter row: control zone separated from table zone by a hairline */
+QWidget#libraryFilterRow {
+    border-bottom: 1px solid #2a2f3a;
+}
+
+/* Table header: bold labels separated from content rows */
 QWidget#libraryHeader {
     border-bottom: 1px solid #3a4150;
     padding-bottom: 4px;

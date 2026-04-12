@@ -59,8 +59,8 @@ class MainWindow(QMainWindow):
         # Page 0: Generate view
         generate_page = QWidget()
         gen_layout = QVBoxLayout(generate_page)
-        gen_layout.setSpacing(10)
-        gen_layout.setContentsMargins(14, 14, 14, 14)
+        gen_layout.setSpacing(0)
+        gen_layout.setContentsMargins(14, 0, 14, 14)
 
         self._ref_panel = ReferencePanel(self._cfg)
         self._ai_panel = AIPanel(

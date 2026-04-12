@@ -83,15 +83,18 @@ class LibraryPanel(QWidget):
         layout.setContentsMargins(14, 14, 14, 14)
         layout.setSpacing(6)
 
-        # Filter row
-        filter_row = QHBoxLayout()
+        # Filter row — wrapped widget for bottom separator
+        filter_widget = QWidget()
+        filter_widget.setObjectName("libraryFilterRow")
+        filter_row = QHBoxLayout(filter_widget)
+        filter_row.setContentsMargins(0, 0, 0, 6)
         filter_row.addWidget(QLabel("Filter by voice:"))
         self._voice_filter = QComboBox()
         self._voice_filter.setMinimumWidth(200)
         self._voice_filter.currentIndexChanged.connect(self._apply_filter)
         filter_row.addWidget(self._voice_filter)
         filter_row.addStretch()
-        layout.addLayout(filter_row)
+        layout.addWidget(filter_widget)
 
         # Header row
         header = QWidget()
