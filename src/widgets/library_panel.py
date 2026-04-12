@@ -65,10 +65,10 @@ class LibraryEntryWidget(QWidget):
         layout.setContentsMargins(4, 2, 4, 2)
 
         filename_label = QLabel(entry.get("filename", ""))
-        filename_label.setMinimumWidth(160)
+        filename_label.setFixedWidth(160)
 
         voice_label = QLabel(os.path.basename(entry.get("voice_path", "")))
-        voice_label.setMinimumWidth(110)
+        voice_label.setFixedWidth(110)
 
         text = entry.get("text", "")
         truncated = text[:50] + "…" if len(text) > 50 else text
@@ -83,8 +83,7 @@ class LibraryEntryWidget(QWidget):
 
         layout.addWidget(filename_label)
         layout.addWidget(voice_label)
-        layout.addWidget(text_label)
-        layout.addStretch()
+        layout.addWidget(text_label, stretch=1)
         layout.addWidget(play_btn)
 
     def set_selected(self, selected: bool) -> None:
@@ -262,12 +261,14 @@ class LibraryPanel(QWidget):
         header.setObjectName("libraryHeader")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(4, 2, 4, 2)
-        for col_text, min_w in [("Title", 160), ("Voice", 110), ("Description", 0)]:
+        for col_text, fixed_w in [("Title", 160), ("Voice", 110), ("Description", 0)]:
             lbl = QLabel(f"<b>{col_text}</b>")
-            if min_w:
-                lbl.setMinimumWidth(min_w)
+            if fixed_w:
+                lbl.setFixedWidth(fixed_w)
+            else:
+                header_layout.addWidget(lbl, stretch=1)
+                continue
             header_layout.addWidget(lbl)
-        header_layout.addStretch()
         header_layout.addSpacing(40)  # align with play button column
         layout.addWidget(header)
 
