@@ -3,8 +3,8 @@
    Palette: blue-slate monochromatic + amber accent (single color point)
 
    Typography: Segoe UI (humanist sans-serif, Windows screen-optimised)
-   Scale (3:4 ratio): 10 / 13 / 16
-   Weights: 400 regular (metadata+body) / 600 semibold (section titles) / 700 bold (CTA)
+   Scale (3:4 ratio): 10 (section labels + readouts) / 13 (body + UI) / 16 (reserved)
+   Weights: 400 regular (body + readouts) / 600 semibold (section titles) / 700 bold (CTA)
 
    Character: recording-console aesthetic — sharp functional controls,
    panel sections not floating cards, amber as the only color with energy
@@ -294,11 +294,16 @@ QComboBox QAbstractItemView {
 }
 
 /* --- Sliders ----------------------------------------------- */
-/* Amber fill — amber is the only color with energy */
+/* Amber fill — amber is the only color with energy.
+   QSlider:focus changes the groove to signal keyboard focus (platform support varies). */
 QSlider::groove:horizontal {
     height: 4px;
     background-color: #3a4150;
     border-radius: 2px;
+}
+
+QSlider:focus::groove:horizontal {
+    background-color: #4a5268;
 }
 
 QSlider::sub-page:horizontal {
@@ -405,9 +410,10 @@ QLabel {
     background-color: transparent;
 }
 
-/* Status as instrument readout — monospace, metadata scale (10px = group label tier) */
+/* Status as instrument readout — monospace, metadata scale (10px = group label tier)
+   Color #a0aabf: lighter than #8a93a8 to hold contrast at 10px for functional readouts */
 QLabel#statusLabel {
-    color: #8a93a8;
+    color: #a0aabf;
     font-family: "Consolas", "Courier New", monospace;
     font-size: 10px;
     font-weight: 400;
