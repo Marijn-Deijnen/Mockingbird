@@ -110,6 +110,8 @@ class VoiceEntryWidget(QWidget):
 
 
 class VoicesPanel(QWidget):
+    voices_changed = pyqtSignal(list)  # emits updated entries list after any mutation
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._all_entries: list[dict] = []
@@ -209,6 +211,7 @@ class VoicesPanel(QWidget):
         }
         entries = voices.add_voice(entry)
         self.load_voices(entries)
+        self.voices_changed.emit(entries)
 
     def _on_play_requested(self, filename: str) -> None:
         path = str(VOICES_DIR / filename)
@@ -218,6 +221,7 @@ class VoicesPanel(QWidget):
     def _on_rename_requested(self, voice_id: str, new_name: str) -> None:
         # Widget already updated its own label; just persist to disk
         self._all_entries = voices.rename_voice(voice_id, new_name)
+        self.voices_changed.emit(self._all_entries)
 
     def _on_delete_requested(self, voice_id: str) -> None:
         entry = next((e for e in self._all_entries if e["id"] == voice_id), None)
@@ -227,3 +231,4 @@ class VoicesPanel(QWidget):
                 file_path.unlink()
         entries = voices.delete_voice(voice_id)
         self.load_voices(entries)
+        self.voices_changed.emit(entries)
