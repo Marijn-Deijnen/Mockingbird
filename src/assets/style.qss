@@ -1,10 +1,13 @@
 /* ============================================================
    Mockingbird — Dark theme
-   Palette: blue-slate monochromatic + amber accent
+   Palette: blue-slate monochromatic + amber accent (single color point)
 
    Typography: Segoe UI (humanist sans-serif, Windows screen-optimised)
    Scale (3:4 ratio): 10 / 11 / 13 / 16
    Weights: 300 light (metadata) / 400 regular (body) / 600 semibold (titles) / 700 bold (CTA)
+
+   Character: recording-console aesthetic — sharp functional controls,
+   panel sections not floating cards, amber as the only color with energy
    ============================================================ */
 
 /* --- Base -------------------------------------------------- */
@@ -47,12 +50,15 @@ QMenu::item:selected {
 }
 
 /* --- Group boxes ------------------------------------------- */
+/* Panel sections — left-border ruled, not floating cards */
 QGroupBox {
-    background-color: #22262e;
-    border: 1px solid #3a4150;
-    border-radius: 6px;
-    margin-top: 10px;
-    padding-top: 6px;
+    background-color: transparent;
+    border: none;
+    border-left: 2px solid #3a4150;
+    border-radius: 0;
+    margin-top: 14px;
+    padding-top: 4px;
+    padding-left: 10px;
     color: #8a93a8;
     font-size: 10px;
     font-weight: 600;
@@ -62,9 +68,15 @@ QGroupBox {
 QGroupBox::title {
     subcontrol-origin: margin;
     subcontrol-position: top left;
-    padding: 0 6px;
-    left: 10px;
+    padding: 0 4px;
+    left: 8px;
     top: -1px;
+}
+
+/* --- Nav bar ----------------------------------------------- */
+/* Bottom border acts as the console panel divider */
+QWidget#navBar {
+    border-bottom: 1px solid #3a4150;
 }
 
 /* --- Nav buttons ------------------------------------------- */
@@ -91,18 +103,19 @@ QPushButton#navBtn:hover:!checked {
 }
 
 /* --- Standard buttons -------------------------------------- */
+/* Sharp-edged functional controls — not floating pills */
 QPushButton {
     background-color: #2a2f3a;
     color: #e8e0d5;
     border: 1px solid #3a4150;
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 5px 14px;
     min-height: 26px;
 }
 
 QPushButton:hover {
     background-color: #313848;
-    border-color: #5b7fa6;
+    border-color: #4a5268;
 }
 
 QPushButton:pressed {
@@ -119,22 +132,22 @@ QPushButton:disabled {
 QPushButton[flat="true"] {
     background-color: transparent;
     border: none;
-    color: #5b7fa6;
+    color: #c89030;
     padding: 2px 6px;
     min-height: 20px;
     text-decoration: none;
 }
 
 QPushButton[flat="true"]:hover {
-    color: #7099c0;
+    color: #e8a838;
 }
 
-/* Generate button — amber accent */
+/* Generate button — amber accent, the single CTA */
 QPushButton#generateBtn {
     background-color: #e8a838;
     color: #1a1d23;
     border: none;
-    border-radius: 4px;
+    border-radius: 2px;
     font-weight: 700;
     font-size: 13px;
     padding: 7px 24px;
@@ -162,18 +175,18 @@ QDoubleSpinBox {
     background-color: #2a2f3a;
     color: #e8e0d5;
     border: 1px solid #3a4150;
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 4px 8px;
     min-height: 24px;
-    selection-background-color: #5b7fa6;
-    selection-color: #e8e0d5;
+    selection-background-color: #e8a838;
+    selection-color: #1a1d23;
 }
 
 QLineEdit:focus,
 QPlainTextEdit:focus,
 QSpinBox:focus,
 QDoubleSpinBox:focus {
-    border-color: #5b7fa6;
+    border-color: #e8a838;
 }
 
 QPlainTextEdit {
@@ -223,13 +236,13 @@ QComboBox {
     background-color: #2a2f3a;
     color: #e8e0d5;
     border: 1px solid #3a4150;
-    border-radius: 4px;
+    border-radius: 2px;
     padding: 4px 8px;
     min-height: 26px;
 }
 
 QComboBox:focus {
-    border-color: #5b7fa6;
+    border-color: #e8a838;
 }
 
 QComboBox::drop-down {
@@ -252,6 +265,7 @@ QComboBox QAbstractItemView {
 }
 
 /* --- Sliders ----------------------------------------------- */
+/* Amber fill — amber is the only color with energy */
 QSlider::groove:horizontal {
     height: 4px;
     background-color: #3a4150;
@@ -259,21 +273,21 @@ QSlider::groove:horizontal {
 }
 
 QSlider::sub-page:horizontal {
-    background-color: #5b7fa6;
+    background-color: #e8a838;
     border-radius: 2px;
 }
 
 QSlider::handle:horizontal {
-    background-color: #5b7fa6;
+    background-color: #e8e0d5;
     border: 2px solid #1a1d23;
-    width: 14px;
-    height: 14px;
-    margin: -5px 0;
-    border-radius: 7px;
+    width: 12px;
+    height: 12px;
+    margin: -4px 0;
+    border-radius: 6px;
 }
 
 QSlider::handle:horizontal:hover {
-    background-color: #7099c0;
+    background-color: #ffffff;
 }
 
 /* --- Checkbox ---------------------------------------------- */
@@ -283,35 +297,35 @@ QCheckBox {
 }
 
 QCheckBox::indicator {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     border: 1px solid #3a4150;
-    border-radius: 3px;
+    border-radius: 2px;
     background-color: #2a2f3a;
 }
 
 QCheckBox::indicator:checked {
-    background-color: #5b7fa6;
-    border-color: #5b7fa6;
+    background-color: #e8a838;
+    border-color: #e8a838;
 }
 
 QCheckBox::indicator:hover {
-    border-color: #5b7fa6;
+    border-color: #e8a838;
 }
 
 /* --- Progress bar ------------------------------------------ */
 QProgressBar {
     background-color: #2a2f3a;
     border: 1px solid #3a4150;
-    border-radius: 4px;
-    max-height: 6px;
+    border-radius: 1px;
+    max-height: 3px;
     text-align: center;
     color: transparent;
 }
 
 QProgressBar::chunk {
-    background-color: #5b7fa6;
-    border-radius: 3px;
+    background-color: #e8a838;
+    border-radius: 1px;
 }
 
 /* --- Scroll bars ------------------------------------------- */
@@ -357,10 +371,13 @@ QLabel {
     background-color: transparent;
 }
 
+/* Status as instrument readout — monospace, tight tracking */
 QLabel#statusLabel {
     color: #8a93a8;
+    font-family: "Consolas", "Courier New", monospace;
     font-size: 11px;
-    font-weight: 300;
+    font-weight: 400;
+    letter-spacing: 0.2px;
 }
 
 QLabel#errorLabel {
@@ -394,7 +411,7 @@ QDialogButtonBox QPushButton {
 QToolTip {
     background-color: #22262e;
     color: #e8e0d5;
-    border: 1px solid #3a4150;
+    border: 1px solid #4a5268;
     padding: 4px 8px;
-    border-radius: 3px;
+    border-radius: 2px;
 }

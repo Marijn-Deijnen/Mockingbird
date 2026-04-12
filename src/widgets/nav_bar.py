@@ -7,6 +7,7 @@ class NavBar(QWidget):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setObjectName("navBar")
         layout = QHBoxLayout(self)
         layout.setContentsMargins(14, 8, 14, 0)
 
