@@ -56,14 +56,17 @@ class VoiceEntryWidget(QWidget):
 
         play_btn = QPushButton("▶")
         play_btn.setFixedWidth(32)
+        play_btn.setObjectName("iconBtn")
         play_btn.clicked.connect(lambda: self.play_requested.emit(filename))
 
         rename_btn = QPushButton("✎")
         rename_btn.setFixedWidth(32)
+        rename_btn.setObjectName("iconBtn")
         rename_btn.clicked.connect(self._start_rename)
 
         delete_btn = QPushButton("✕")
         delete_btn.setFixedWidth(32)
+        delete_btn.setObjectName("iconBtn")
         delete_btn.clicked.connect(self._on_delete)
 
         layout.addWidget(self._name_label)

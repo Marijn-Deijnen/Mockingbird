@@ -77,6 +77,7 @@ class LibraryEntryWidget(QWidget):
 
         play_btn = QPushButton("▶")
         play_btn.setFixedWidth(32)
+        play_btn.setObjectName("iconBtn")
         play_btn.clicked.connect(
             lambda: self.play_requested.emit(entry.get("filename", ""))
         )
