@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-CONFIG_PATH = Path(__file__).parent.parent / "config.json"
+from src.paths import app_dir
+
+CONFIG_PATH = app_dir() / "config.json"
 
 DEFAULTS = {
     "last_voice_id": "",

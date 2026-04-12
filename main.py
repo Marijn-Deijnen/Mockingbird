@@ -1,13 +1,13 @@
 import sys
-from pathlib import Path
 
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QApplication
 
 from src.app import MainWindow
+from src.paths import assets_dir
 
-ICON_PATH = Path(__file__).parent / "src" / "assets" / "icon.png"
-STYLE_PATH = Path(__file__).parent / "src" / "assets" / "style.qss"
+ICON_PATH = assets_dir() / "icon.png"
+STYLE_PATH = assets_dir() / "style.qss"
 
 
 def main():

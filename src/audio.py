@@ -5,7 +5,9 @@ from pathlib import Path
 
 import imageio_ffmpeg
 
-OUTPUT_DIR = Path(__file__).parent.parent / "output"
+from src.paths import app_dir
+
+OUTPUT_DIR = app_dir() / "output"
 
 
 def ensure_wav(path: str) -> str:

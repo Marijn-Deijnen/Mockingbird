@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-VOICES_DIR = Path(__file__).parent.parent / "audio"
+from src.paths import app_dir
+
+VOICES_DIR = app_dir() / "audio"
 VOICES_PATH = VOICES_DIR / "voices.json"
 
 

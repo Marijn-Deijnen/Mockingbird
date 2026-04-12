@@ -1,7 +1,9 @@
 import json
 from pathlib import Path
 
-LIBRARY_PATH = Path(__file__).parent.parent / "output" / "library.json"
+from src.paths import app_dir
+
+LIBRARY_PATH = app_dir() / "output" / "library.json"
 
 
 def load() -> list[dict]:
