@@ -228,7 +228,7 @@ class MainWindow(QMainWindow):
             return
         self._current_output_path = new_path
         entries = library.update_filename(
-            self._current_output_id, Path(new_path).name
+            Path(old_path).stem, Path(new_path).name
         )
         self._library_panel.load_entries(entries)
         self._output_panel.update_output_path(new_path)
