@@ -173,6 +173,8 @@ class VoicesPanel(QWidget):
 
         self._content = QWidget()
         self._content_layout = QVBoxLayout(self._content)
+        self._content_layout.setContentsMargins(0, 0, 0, 0)
+        self._content_layout.setSpacing(0)
         self._content_layout.addStretch()
         self._scroll.setWidget(self._content)
 

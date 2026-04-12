@@ -31,18 +31,26 @@ class AISettingsPanel(QWidget):
         # --- AI Prompt visibility ---
         prompt_group = QGroupBox("Generate Tab")
         prompt_form = QFormLayout(prompt_group)
+        show_prompt_widget = QWidget()
+        show_prompt_row = QHBoxLayout(show_prompt_widget)
+        show_prompt_row.setContentsMargins(0, 0, 0, 0)
         self._show_prompt_check = QCheckBox()
-        self._show_prompt_check.setChecked(cfg.get("show_ai_prompt", True))
-        prompt_form.addRow("Show AI Prompt panel", self._show_prompt_check)
+        show_prompt_row.addWidget(self._show_prompt_check)
+        show_prompt_row.addStretch()
+        prompt_form.addRow("Show AI Prompt panel", show_prompt_widget)
         outer.addWidget(prompt_group)
 
         # --- Ollama connection ---
         ollama_group = QGroupBox("AI Assistant (Ollama)")
         form = QFormLayout(ollama_group)
 
+        enabled_widget = QWidget()
+        enabled_row = QHBoxLayout(enabled_widget)
+        enabled_row.setContentsMargins(0, 0, 0, 0)
         self._enabled_check = QCheckBox()
-        self._enabled_check.setChecked(cfg.get("ollama_enabled", False))
-        form.addRow("Enable AI features", self._enabled_check)
+        enabled_row.addWidget(self._enabled_check)
+        enabled_row.addStretch()
+        form.addRow("Enable AI features", enabled_widget)
 
         self._host_edit = QLineEdit(cfg.get("ollama_host", "127.0.0.1"))
         form.addRow("Host", self._host_edit)
