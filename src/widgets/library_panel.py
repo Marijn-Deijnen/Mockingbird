@@ -217,11 +217,13 @@ class LibraryDetailPanel(QWidget):
 
 
 class LibraryPanel(QWidget):
-    entry_deleted = pyqtSignal(str)  # entry id
+    entry_deleted = pyqtSignal(str)      # entry id
+    file_renamed = pyqtSignal(str, str)  # old_path, new_name
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._all_entries: list[dict] = []
+        self._selected_widget: LibraryEntryWidget | None = None
         self._player = QMediaPlayer()
         self._audio_output = QAudioOutput()
         self._player.setAudioOutput(self._audio_output)
@@ -230,33 +232,46 @@ class LibraryPanel(QWidget):
         layout.setContentsMargins(14, 14, 14, 14)
         layout.setSpacing(6)
 
-        # Filter row — wrapped widget for bottom separator
-        filter_widget = QWidget()
-        filter_widget.setObjectName("libraryFilterRow")
-        filter_row = QHBoxLayout(filter_widget)
-        filter_row.setContentsMargins(0, 0, 0, 6)
-        filter_row.addWidget(QLabel("Filter by voice:"))
+        # Toolbar strip
+        toolbar = QWidget()
+        toolbar.setObjectName("libraryToolbar")
+        toolbar_row = QHBoxLayout(toolbar)
+        toolbar_row.setContentsMargins(0, 0, 0, 6)
+        toolbar_row.setSpacing(8)
+
+        self._search_box = QLineEdit()
+        self._search_box.setPlaceholderText("Search…")
+        self._search_box.textChanged.connect(self._apply_filter)
+
         self._voice_filter = QComboBox()
-        self._voice_filter.setMinimumWidth(200)
+        self._voice_filter.setMinimumWidth(160)
         self._voice_filter.currentIndexChanged.connect(self._apply_filter)
-        filter_row.addWidget(self._voice_filter)
-        filter_row.addStretch()
-        layout.addWidget(filter_widget)
+
+        self._sort_combo = QComboBox()
+        self._sort_combo.setMinimumWidth(130)
+        self._sort_combo.addItems(["Newest first", "Oldest first", "By voice A→Z"])
+        self._sort_combo.currentIndexChanged.connect(self._apply_filter)
+
+        toolbar_row.addWidget(self._search_box, stretch=1)
+        toolbar_row.addWidget(self._voice_filter)
+        toolbar_row.addWidget(self._sort_combo)
+        layout.addWidget(toolbar)
 
         # Header row
         header = QWidget()
         header.setObjectName("libraryHeader")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(4, 2, 4, 2)
-        for text, min_width in [("Title", 160), ("Voice", 110), ("Description", 200)]:
-            lbl = QLabel(f"<b>{text}</b>")
-            lbl.setMinimumWidth(min_width)
+        for col_text, min_w in [("Title", 160), ("Voice", 110), ("Description", 0)]:
+            lbl = QLabel(f"<b>{col_text}</b>")
+            if min_w:
+                lbl.setMinimumWidth(min_w)
             header_layout.addWidget(lbl)
         header_layout.addStretch()
-        # Spacer to align with play button (32 + spacing)
-        header_layout.addSpacing(72)
+        header_layout.addSpacing(40)  # align with play button column
         layout.addWidget(header)
 
+        # Scrollable table
         self._scroll = QScrollArea()
         self._scroll.setWidgetResizable(True)
         layout.addWidget(self._scroll)
@@ -265,6 +280,15 @@ class LibraryPanel(QWidget):
         self._content_layout = QVBoxLayout(self._content)
         self._content_layout.addStretch()
         self._scroll.setWidget(self._content)
+
+        # Detail panel
+        self._detail = LibraryDetailPanel()
+        self._detail.file_renamed.connect(self.file_renamed)
+        self._detail.entry_deleted.connect(self._on_detail_delete)
+        layout.addWidget(self._detail)
+
+        # Playback state drives playing indicator
+        self._player.playbackStateChanged.connect(self._on_playback_state_changed)
 
     def load_entries(self, entries: list[dict]) -> None:
         self._all_entries = entries
@@ -288,14 +312,14 @@ class LibraryPanel(QWidget):
         self._voice_filter.blockSignals(False)
 
     def _apply_filter(self) -> None:
-        selected = self._voice_filter.currentText()
-        if selected == "All voices":
-            visible = self._all_entries
-        else:
-            visible = [
-                e for e in self._all_entries
-                if os.path.basename(e.get("voice_path", "")) == selected
-            ]
+        search = self._search_box.text().strip()
+        voice = self._voice_filter.currentText()
+        sort = self._sort_combo.currentText()
+        visible = filter_entries(self._all_entries, search, voice, sort)
+
+        # Clear selection whenever the list rebuilds
+        self._selected_widget = None
+        self._detail.clear()
 
         while self._content_layout.count() > 1:
             item = self._content_layout.takeAt(0)
@@ -305,11 +329,40 @@ class LibraryPanel(QWidget):
         for i, entry in enumerate(visible):
             widget = LibraryEntryWidget(entry, i)
             widget.play_requested.connect(self._on_play_requested)
+            widget.row_selected.connect(
+                lambda e, w=widget: self._on_row_selected(e, w)
+            )
+            widget.row_deselected.connect(self._on_row_deselected)
             self._content_layout.insertWidget(
                 self._content_layout.count() - 1, widget
             )
+
+    def _on_row_selected(
+        self, entry: dict, widget: LibraryEntryWidget
+    ) -> None:
+        if self._selected_widget is not None and self._selected_widget is not widget:
+            self._selected_widget.set_selected(False)
+        self._selected_widget = widget
+        widget.set_selected(True)
+        self._detail.load_entry(entry)
+
+    def _on_row_deselected(self) -> None:
+        if self._selected_widget is not None:
+            self._selected_widget.set_selected(False)
+        self._selected_widget = None
+        self._detail.clear()
 
     def _on_play_requested(self, filename: str) -> None:
         path = str(OUTPUT_DIR / filename)
         self._player.setSource(QUrl.fromLocalFile(path))
         self._player.play()
+
+    def _on_playback_state_changed(
+        self, state: QMediaPlayer.PlaybackState
+    ) -> None:
+        playing = state == QMediaPlayer.PlaybackState.PlayingState
+        self._detail.set_playing(playing)
+
+    def _on_detail_delete(self, entry_id: str) -> None:
+        self._selected_widget = None
+        self.entry_deleted.emit(entry_id)
