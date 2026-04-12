@@ -1,4 +1,8 @@
 # mockingbird.spec — PyInstaller build spec for Mockingbird
+import glob
+import os
+import sys
+
 from PyInstaller.utils.hooks import collect_data_files
 
 block_cipher = None
@@ -9,10 +13,18 @@ datas = [
 datas += collect_data_files("imageio_ffmpeg")   # bundled ffmpeg binary
 datas += collect_data_files("soundfile")         # libsndfile
 
+# Explicitly bundle Python runtime DLLs — PyInstaller sometimes misses these
+_py_dir = os.path.dirname(sys.executable)
+binaries = [
+    (dll, ".")
+    for dll in glob.glob(os.path.join(_py_dir, "python*.dll"))
+    + glob.glob(os.path.join(_py_dir, "vcruntime*.dll"))
+]
+
 a = Analysis(
     ["main.py"],
     pathex=[],
-    binaries=[],
+    binaries=binaries,
     datas=datas,
     hiddenimports=[
         "PyQt6.QtMultimedia",
