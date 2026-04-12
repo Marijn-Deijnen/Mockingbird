@@ -1,18 +1,29 @@
+import threading
+
 from PyQt6.QtCore import QThread, pyqtSignal
 
 _cached_model = None
 _cached_denoiser: bool | None = None
+_model_lock = threading.Lock()
 
 
 def _get_model(use_denoiser: bool):
     global _cached_model, _cached_denoiser
-    if _cached_model is None or _cached_denoiser != use_denoiser:
-        from voxcpm import VoxCPM
-        _cached_model = VoxCPM.from_pretrained(
-            "openbmb/VoxCPM2", load_denoiser=use_denoiser
-        )
-        _cached_denoiser = use_denoiser
-    return _cached_model
+    with _model_lock:
+        if _cached_model is None or _cached_denoiser != use_denoiser:
+            from voxcpm import VoxCPM
+            _cached_model = VoxCPM.from_pretrained(
+                "openbmb/VoxCPM2", load_denoiser=use_denoiser
+            )
+            _cached_denoiser = use_denoiser
+        return _cached_model
+
+
+def preload_model(use_denoiser: bool) -> None:
+    """Load the model in a background daemon thread so it is warm on first use."""
+    threading.Thread(
+        target=_get_model, args=(use_denoiser,), daemon=True, name="model-preload"
+    ).start()
 
 
 class GenerationWorker(QThread):

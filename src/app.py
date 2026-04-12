@@ -12,7 +12,7 @@ from PyQt6.QtWidgets import (
 
 from src import audio, config, library, voices
 from src.dialogs.settings_dialog import SettingsDialog
-from src.model import GenerationWorker
+from src.model import GenerationWorker, preload_model
 from src.ollama import NamingWorker
 from src.widgets.ai_panel import AIPanel
 from src.widgets.library_panel import LibraryPanel
@@ -36,6 +36,7 @@ class MainWindow(QMainWindow):
         self._current_output_id: str | None = None
         self._setup_menu()
         self._setup_ui()
+        preload_model(self._cfg.get("use_denoiser", False))
 
     def _setup_menu(self):
         menu_bar = QMenuBar(self)
@@ -134,6 +135,7 @@ class MainWindow(QMainWindow):
             self._settings_panel.set_values(2.0, 10, False)
 
     def _on_settings_changed(self, values: dict):
+        prev_denoiser = self._cfg.get("use_denoiser", False)
         self._cfg.update(values)
         current_voice_id = self._voice_selector.current_voice_id()
         if current_voice_id:
@@ -143,6 +145,8 @@ class MainWindow(QMainWindow):
                 "use_denoiser": values["use_denoiser"],
             }
         config.save(self._cfg)
+        if values["use_denoiser"] != prev_denoiser:
+            preload_model(values["use_denoiser"])
 
     def closeEvent(self, event):
         if self._worker is not None and self._worker.isRunning():
