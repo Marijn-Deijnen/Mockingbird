@@ -1,6 +1,10 @@
 /* ============================================================
    Mockingbird — Dark theme
    Palette: blue-slate monochromatic + amber accent
+
+   Typography: Segoe UI (humanist sans-serif, Windows screen-optimised)
+   Scale (3:4 ratio): 10 / 11 / 13 / 16
+   Weights: 300 light (metadata) / 400 regular (body) / 600 semibold (titles) / 700 bold (CTA)
    ============================================================ */
 
 /* --- Base -------------------------------------------------- */
@@ -9,8 +13,9 @@ QDialog,
 QWidget {
     background-color: #1a1d23;
     color: #e8e0d5;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: "Segoe UI", "Meiryo", Arial, sans-serif;
     font-size: 13px;
+    font-weight: 400;
 }
 
 /* --- Menu bar ---------------------------------------------- */
@@ -49,8 +54,9 @@ QGroupBox {
     margin-top: 10px;
     padding-top: 6px;
     color: #8a93a8;
-    font-size: 11px;
-    font-weight: bold;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 QGroupBox::title {
@@ -70,12 +76,14 @@ QPushButton#navBtn {
     color: #8a93a8;
     padding: 6px 18px;
     font-size: 13px;
+    font-weight: 400;
     min-height: 32px;
 }
 
 QPushButton#navBtn:checked {
     color: #e8e0d5;
     border-bottom: 2px solid #e8a838;
+    font-weight: 600;
 }
 
 QPushButton#navBtn:hover:!checked {
@@ -127,7 +135,8 @@ QPushButton#generateBtn {
     color: #1a1d23;
     border: none;
     border-radius: 4px;
-    font-weight: bold;
+    font-weight: 700;
+    font-size: 13px;
     padding: 7px 24px;
     min-height: 30px;
 }
@@ -169,6 +178,7 @@ QDoubleSpinBox:focus {
 
 QPlainTextEdit {
     padding: 6px 8px;
+    line-height: 1.4;
 }
 
 QSpinBox::up-button,
@@ -349,12 +359,14 @@ QLabel {
 
 QLabel#statusLabel {
     color: #8a93a8;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 300;
 }
 
 QLabel#errorLabel {
     color: #e05c5c;
-    font-size: 12px;
+    font-size: 11px;
+    font-weight: 400;
 }
 
 /* --- Library rows ------------------------------------------ */
