@@ -109,6 +109,113 @@ class LibraryEntryWidget(QWidget):
         super().mousePressEvent(event)
 
 
+class LibraryDetailPanel(QWidget):
+    file_renamed = pyqtSignal(str, str)  # old_path, new_name
+    entry_deleted = pyqtSignal(str)      # entry id
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setObjectName("libraryDetail")
+        self._entry: dict | None = None
+        self.setVisible(False)
+        self.setFixedHeight(120)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(8, 6, 8, 6)
+        layout.setSpacing(6)
+
+        # Top row: full text + right-aligned metadata
+        top_row = QHBoxLayout()
+        self._text_label = QLabel()
+        self._text_label.setWordWrap(True)
+        self._meta_label = QLabel()
+        self._meta_label.setObjectName("statusLabel")
+        self._meta_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignTop
+        )
+        top_row.addWidget(self._text_label, stretch=1)
+        top_row.addWidget(self._meta_label)
+        layout.addLayout(top_row)
+
+        # Bottom row: rename field + playing indicator + delete button
+        bottom_row = QHBoxLayout()
+        self._rename_edit = QLineEdit()
+        self._rename_edit.editingFinished.connect(self._on_rename)
+
+        self._playing_label = QLabel("▶ playing")
+        self._playing_label.setObjectName("libraryPlayingIndicator")
+        self._playing_label.setVisible(False)
+
+        self._delete_btn = QPushButton("Delete")
+        self._delete_btn.setFixedWidth(70)
+        self._delete_btn.clicked.connect(self._on_delete)
+
+        bottom_row.addWidget(self._rename_edit, stretch=1)
+        bottom_row.addWidget(self._playing_label)
+        bottom_row.addWidget(self._delete_btn)
+        layout.addLayout(bottom_row)
+
+    def load_entry(self, entry: dict) -> None:
+        self._entry = entry
+
+        self._text_label.setText(entry.get("text", ""))
+
+        settings = entry.get("settings", {})
+        cfg = settings.get("cfg_value", "—")
+        steps = settings.get("inference_timesteps", "—")
+        denoiser = "denoiser on" if settings.get("use_denoiser") else "denoiser off"
+        created = entry.get("created_at", "")[:16].replace("T", " ")
+        self._meta_label.setText(
+            f"{created} · cfg {cfg} · {steps} steps · {denoiser}"
+        )
+
+        stem = Path(entry.get("filename", "")).stem
+        self._rename_edit.blockSignals(True)
+        self._rename_edit.setText(stem)
+        self._rename_edit.blockSignals(False)
+
+        self._playing_label.setVisible(False)
+        self.setVisible(True)
+
+    def clear(self) -> None:
+        self._entry = None
+        self.setVisible(False)
+
+    def set_playing(self, playing: bool) -> None:
+        self._playing_label.setVisible(playing)
+
+    def _on_rename(self) -> None:
+        if self._entry is None:
+            return
+        new_name = self._rename_edit.text().strip()
+        if not new_name:
+            return
+        old_filename = self._entry.get("filename", "")
+        old_stem = Path(old_filename).stem
+        if new_name == old_stem:
+            return
+        # Update _entry immediately so a second editingFinished is a no-op
+        suffix = Path(old_filename).suffix
+        self._entry = dict(self._entry)
+        self._entry["filename"] = new_name + suffix
+        old_path = str(OUTPUT_DIR / old_filename)
+        self.file_renamed.emit(old_path, new_name)
+
+    def _on_delete(self) -> None:
+        if self._entry is None:
+            return
+        reply = QMessageBox.question(
+            self,
+            "Delete",
+            f"Delete {self._entry.get('filename', 'this file')}?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply == QMessageBox.StandardButton.Yes:
+            entry_id = self._entry.get("id", "")
+            if entry_id:
+                self.entry_deleted.emit(entry_id)
+
+
 class LibraryPanel(QWidget):
     entry_deleted = pyqtSignal(str)  # entry id
 
