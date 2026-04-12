@@ -3,7 +3,7 @@ import glob
 import os
 import sys
 
-from PyInstaller.utils.hooks import collect_data_files
+from PyInstaller.utils.hooks import collect_all, collect_data_files
 
 block_cipher = None
 
@@ -13,6 +13,11 @@ datas = [
 datas += collect_data_files("imageio_ffmpeg")   # bundled ffmpeg binary
 datas += collect_data_files("soundfile")         # libsndfile
 
+# Collect voxcpm as source files on disk so TorchScript can call
+# inspect.getsource() at runtime (compiling to .pyc breaks this)
+voxcpm_datas, voxcpm_binaries, voxcpm_hiddenimports = collect_all("voxcpm")
+datas += voxcpm_datas
+
 # Explicitly bundle Python runtime DLLs — PyInstaller sometimes misses these
 _py_dir = os.path.dirname(sys.executable)
 binaries = [
@@ -20,6 +25,7 @@ binaries = [
     for dll in glob.glob(os.path.join(_py_dir, "python*.dll"))
     + glob.glob(os.path.join(_py_dir, "vcruntime*.dll"))
 ]
+binaries += voxcpm_binaries
 
 a = Analysis(
     ["main.py"],
@@ -31,6 +37,7 @@ a = Analysis(
         "PyQt6.QtMultimediaWidgets",
         "soundfile",
         "imageio_ffmpeg",
+        *voxcpm_hiddenimports,
     ],
     hookspath=[],
     hooksconfig={},
@@ -39,6 +46,10 @@ a = Analysis(
     cipher=block_cipher,
     noarchive=False,
 )
+
+# Remove voxcpm from the compiled PYZ archive so it stays as .py files
+# on disk — required for TorchScript's inspect.getsource() to work
+a.pure = [entry for entry in a.pure if not entry[0].startswith("voxcpm")]
 
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
