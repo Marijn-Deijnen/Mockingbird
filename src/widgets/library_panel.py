@@ -1,11 +1,13 @@
 import os
+from pathlib import Path
 
-from PyQt6.QtCore import QUrl, pyqtSignal
+from PyQt6.QtCore import QUrl, Qt, pyqtSignal
 from PyQt6.QtMultimedia import QAudioOutput, QMediaPlayer
 from PyQt6.QtWidgets import (
     QComboBox,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QMessageBox,
     QPushButton,
     QScrollArea,
@@ -48,12 +50,16 @@ def filter_entries(
 
 
 class LibraryEntryWidget(QWidget):
-    delete_requested = pyqtSignal(str)  # entry id
-    play_requested = pyqtSignal(str)    # filename (not full path)
+    play_requested = pyqtSignal(str)    # filename
+    row_selected = pyqtSignal(object)   # entry dict
+    row_deselected = pyqtSignal()
 
-    def __init__(self, entry: dict, parent=None):
+    def __init__(self, entry: dict, row_index: int, parent=None):
         super().__init__(parent)
         self._entry = entry
+        self._row_index = row_index
+        self._is_selected = False
+        self._update_object_name()
 
         layout = QHBoxLayout(self)
         layout.setContentsMargins(4, 2, 4, 2)
@@ -65,39 +71,42 @@ class LibraryEntryWidget(QWidget):
         voice_label.setMinimumWidth(110)
 
         text = entry.get("text", "")
-        truncated = text[:30] + "…" if len(text) > 30 else text
+        truncated = text[:50] + "…" if len(text) > 50 else text
         text_label = QLabel(truncated)
         text_label.setToolTip(text)
-        text_label.setMinimumWidth(200)
 
         play_btn = QPushButton("▶")
         play_btn.setFixedWidth(32)
-        delete_btn = QPushButton("✕")
-        delete_btn.setFixedWidth(32)
+        play_btn.clicked.connect(
+            lambda: self.play_requested.emit(entry.get("filename", ""))
+        )
 
         layout.addWidget(filename_label)
         layout.addWidget(voice_label)
         layout.addWidget(text_label)
         layout.addStretch()
         layout.addWidget(play_btn)
-        layout.addWidget(delete_btn)
 
-        play_btn.clicked.connect(
-            lambda: self.play_requested.emit(entry.get("filename", ""))
-        )
-        delete_btn.clicked.connect(self._on_delete)
+    def set_selected(self, selected: bool) -> None:
+        self._is_selected = selected
+        self._update_object_name()
+        self.style().unpolish(self)
+        self.style().polish(self)
 
-    def _on_delete(self):
-        reply = QMessageBox.question(
-            self,
-            "Delete",
-            f"Delete {self._entry.get('filename', 'this file')}?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-        )
-        if reply == QMessageBox.StandardButton.Yes:
-            entry_id = self._entry.get("id", "")
-            if entry_id:
-                self.delete_requested.emit(entry_id)
+    def _update_object_name(self) -> None:
+        if self._is_selected:
+            self.setObjectName("libraryRowSelected")
+        else:
+            self.setObjectName(
+                "libraryRowEven" if self._row_index % 2 == 0 else "libraryRowOdd"
+            )
+
+    def mousePressEvent(self, event) -> None:
+        if self._is_selected:
+            self.row_deselected.emit()
+        else:
+            self.row_selected.emit(self._entry)
+        super().mousePressEvent(event)
 
 
 class LibraryPanel(QWidget):
@@ -187,9 +196,7 @@ class LibraryPanel(QWidget):
                 item.widget().deleteLater()
 
         for i, entry in enumerate(visible):
-            widget = LibraryEntryWidget(entry)
-            widget.setObjectName("libraryRowEven" if i % 2 == 0 else "libraryRowOdd")
-            widget.delete_requested.connect(self.entry_deleted)
+            widget = LibraryEntryWidget(entry, i)
             widget.play_requested.connect(self._on_play_requested)
             self._content_layout.insertWidget(
                 self._content_layout.count() - 1, widget
