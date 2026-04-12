@@ -93,6 +93,7 @@ class MainWindow(QMainWindow):
         self._output_panel.generate_requested.connect(self._on_generate)
         self._output_panel.file_renamed.connect(self._on_file_renamed)
         self._library_panel.entry_deleted.connect(self._on_library_entry_deleted)
+        self._library_panel.file_renamed.connect(self._on_file_renamed)
 
     def _open_settings_dialog(self):
         dialog = SettingsDialog(self._cfg, parent=self)
@@ -227,7 +228,7 @@ class MainWindow(QMainWindow):
             return
         self._current_output_path = new_path
         entries = library.update_filename(
-            self._current_output_id, Path(new_path).name
+            Path(old_path).stem, Path(new_path).name
         )
         self._library_panel.load_entries(entries)
         self._output_panel.update_output_path(new_path)
