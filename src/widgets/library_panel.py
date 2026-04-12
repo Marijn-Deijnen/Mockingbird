@@ -318,6 +318,8 @@ class LibraryPanel(QWidget):
         visible = filter_entries(self._all_entries, search, voice, sort)
 
         # Clear selection whenever the list rebuilds
+        if self._selected_widget is not None:
+            self._selected_widget.set_selected(False)
         self._selected_widget = None
         self._detail.clear()
 
@@ -365,4 +367,5 @@ class LibraryPanel(QWidget):
 
     def _on_detail_delete(self, entry_id: str) -> None:
         self._selected_widget = None
+        self._detail.clear()
         self.entry_deleted.emit(entry_id)
