@@ -16,6 +16,37 @@ from PyQt6.QtWidgets import (
 from src.audio import OUTPUT_DIR
 
 
+def filter_entries(
+    entries: list[dict], search: str, voice: str, sort: str
+) -> list[dict]:
+    """Pure filter + sort — no Qt, fully testable."""
+    visible = entries
+
+    if voice != "All voices":
+        visible = [
+            e for e in visible
+            if os.path.basename(e.get("voice_path", "")) == voice
+        ]
+
+    if search:
+        q = search.lower()
+        visible = [
+            e for e in visible
+            if q in e.get("filename", "").lower()
+            or q in e.get("text", "").lower()
+        ]
+
+    if sort == "Oldest first":
+        visible = list(reversed(visible))
+    elif sort == "By voice A→Z":
+        visible = sorted(
+            visible,
+            key=lambda e: os.path.basename(e.get("voice_path", "")).lower(),
+        )
+
+    return visible
+
+
 class LibraryEntryWidget(QWidget):
     delete_requested = pyqtSignal(str)  # entry id
     play_requested = pyqtSignal(str)    # filename (not full path)
