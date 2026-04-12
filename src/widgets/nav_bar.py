@@ -12,6 +12,8 @@ class NavBar(QWidget):
 
         self._generate_btn = QPushButton("Generate")
         self._library_btn = QPushButton("Library")
+        self._generate_btn.setObjectName("navBtn")
+        self._library_btn.setObjectName("navBtn")
         self._generate_btn.setCheckable(True)
         self._library_btn.setCheckable(True)
         self._generate_btn.setChecked(True)

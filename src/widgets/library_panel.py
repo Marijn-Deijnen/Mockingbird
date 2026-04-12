@@ -151,8 +151,9 @@ class LibraryPanel(QWidget):
             if item.widget():
                 item.widget().deleteLater()
 
-        for entry in visible:
+        for i, entry in enumerate(visible):
             widget = LibraryEntryWidget(entry)
+            widget.setObjectName("libraryRowEven" if i % 2 == 0 else "libraryRowOdd")
             widget.delete_requested.connect(self.entry_deleted)
             widget.play_requested.connect(self._on_play_requested)
             self._content_layout.insertWidget(

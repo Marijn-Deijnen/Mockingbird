@@ -36,6 +36,7 @@ class OutputPanel(QGroupBox):
 
         btn_row = QHBoxLayout()
         self._generate_btn = QPushButton("Generate")
+        self._generate_btn.setObjectName("generateBtn")
         self._play_btn = QPushButton("▶ Play")
         self._stop_btn = QPushButton("■ Stop")
         self._play_btn.setEnabled(False)
@@ -63,6 +64,7 @@ class OutputPanel(QGroupBox):
         layout.addWidget(self._filename_row_widget)
 
         self._status_label = QLabel("")
+        self._status_label.setObjectName("statusLabel")
         layout.addWidget(self._status_label)
 
         self._generate_btn.clicked.connect(self.generate_requested)
@@ -80,7 +82,7 @@ class OutputPanel(QGroupBox):
 
     def set_output(self, path: str):
         self._last_output = path
-        self._status_label.setText(path)
+        self._status_label.setText(f"Saved: {Path(path).name}")
         self._progress.setVisible(False)
         self._generate_btn.setEnabled(True)
         self._play_btn.setEnabled(True)
@@ -94,7 +96,7 @@ class OutputPanel(QGroupBox):
     def update_output_path(self, new_path: str) -> None:
         """Called after a successful rename to update stored path and field."""
         self._last_output = new_path
-        self._status_label.setText(new_path)
+        self._status_label.setText(f"Saved: {Path(new_path).name}")
         self._filename_edit_widget.setText(Path(new_path).stem)
 
     def show_error(self, message: str):
