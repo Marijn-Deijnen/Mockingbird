@@ -1,5 +1,19 @@
 from PyQt6.QtCore import QThread, pyqtSignal
 
+_cached_model = None
+_cached_denoiser: bool | None = None
+
+
+def _get_model(use_denoiser: bool):
+    global _cached_model, _cached_denoiser
+    if _cached_model is None or _cached_denoiser != use_denoiser:
+        from voxcpm import VoxCPM
+        _cached_model = VoxCPM.from_pretrained(
+            "openbmb/VoxCPM2", load_denoiser=use_denoiser
+        )
+        _cached_denoiser = use_denoiser
+    return _cached_model
+
 
 class GenerationWorker(QThread):
     finished = pyqtSignal(object, int)  # (wav ndarray, sample_rate)
@@ -22,11 +36,7 @@ class GenerationWorker(QThread):
 
     def run(self):
         try:
-            from voxcpm import VoxCPM
-
-            model = VoxCPM.from_pretrained(
-                "openbmb/VoxCPM2", load_denoiser=self.use_denoiser
-            )
+            model = _get_model(self.use_denoiser)
             wav = model.generate(
                 text=self.text,
                 reference_wav_path=self.reference_wav,
