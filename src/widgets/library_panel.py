@@ -95,6 +95,7 @@ class LibraryPanel(QWidget):
 
         # Header row
         header = QWidget()
+        header.setObjectName("libraryHeader")
         header_layout = QHBoxLayout(header)
         header_layout.setContentsMargins(4, 2, 4, 2)
         for text, min_width in [("Title", 160), ("Voice", 110), ("Description", 200)]:

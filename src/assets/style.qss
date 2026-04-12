@@ -3,8 +3,8 @@
    Palette: blue-slate monochromatic + amber accent (single color point)
 
    Typography: Segoe UI (humanist sans-serif, Windows screen-optimised)
-   Scale (3:4 ratio): 10 / 11 / 13 / 16
-   Weights: 300 light (metadata) / 400 regular (body) / 600 semibold (titles) / 700 bold (CTA)
+   Scale (3:4 ratio): 10 / 13 / 16
+   Weights: 400 regular (metadata+body) / 600 semibold (section titles) / 700 bold (CTA)
 
    Character: recording-console aesthetic — sharp functional controls,
    panel sections not floating cards, amber as the only color with energy
@@ -31,7 +31,7 @@ QMenuBar {
 
 QMenuBar::item:selected {
     background-color: #2a2f3a;
-    border-radius: 3px;
+    border-radius: 2px;
 }
 
 QMenu {
@@ -50,11 +50,12 @@ QMenu::item:selected {
 }
 
 /* --- Group boxes ------------------------------------------- */
-/* Panel sections — left-border ruled, not floating cards */
+/* Panel sections — left-border ruled, not floating cards.
+   Minimal surface tint (#1c1f25) creates depth without floating-card effect. */
 QGroupBox {
-    background-color: transparent;
+    background-color: #1c1f25;
     border: none;
-    border-left: 2px solid #3a4150;
+    border-left: 2px solid #4a5268;
     border-radius: 0;
     margin-top: 14px;
     padding-top: 4px;
@@ -250,8 +251,8 @@ QComboBox::drop-down {
     border-left: 1px solid #3a4150;
     width: 22px;
     subcontrol-position: top right;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
 }
 
 QComboBox QAbstractItemView {
@@ -371,30 +372,36 @@ QLabel {
     background-color: transparent;
 }
 
-/* Status as instrument readout — monospace, tight tracking */
+/* Status as instrument readout — monospace, metadata scale (10px = group label tier) */
 QLabel#statusLabel {
     color: #8a93a8;
     font-family: "Consolas", "Courier New", monospace;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 400;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.3px;
 }
 
 QLabel#errorLabel {
     color: #e05c5c;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 400;
+}
+
+/* --- Library header ---------------------------------------- */
+QWidget#libraryHeader {
+    border-bottom: 1px solid #3a4150;
+    padding-bottom: 4px;
 }
 
 /* --- Library rows ------------------------------------------ */
 QWidget#libraryRowEven {
     background-color: #22262e;
-    border-radius: 3px;
+    border-radius: 0;
 }
 
 QWidget#libraryRowOdd {
     background-color: #1e2128;
-    border-radius: 3px;
+    border-radius: 0;
 }
 
 QWidget#libraryRowEven:hover,
