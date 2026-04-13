@@ -15,18 +15,22 @@ class OllamaWorker(QThread):
     finished = pyqtSignal(str)
     error = pyqtSignal(str)
 
-    def __init__(self, text: str, host: str, port: int, model: str):
+    def __init__(self, text: str, host: str, port: int, model: str, system: str = ""):
         super().__init__()
         self.text = text
         self.host = host
         self.port = port
         self.model = model
+        self.system = system
 
     def run(self):
         try:
+            payload = {"model": self.model, "prompt": self.text, "stream": False}
+            if self.system:
+                payload["system"] = self.system
             response = requests.post(
                 f"http://{self.host}:{self.port}/api/generate",
-                json={"model": self.model, "prompt": self.text, "stream": False},
+                json=payload,
                 timeout=60,
             )
             response.raise_for_status()

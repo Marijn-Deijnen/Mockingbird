@@ -85,3 +85,47 @@ def test_naming_worker_silent_on_error():
         w.finished.connect(lambda name: received.append(name))
         w.run()
     assert received == []
+
+
+def test_ollama_worker_sends_system_prompt():
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    from unittest.mock import patch, MagicMock
+    app = QApplication.instance() or QApplication(sys.argv)
+    from src.ollama import OllamaWorker
+
+    captured = {}
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"response": "ok"}
+
+    def capture(url, json, timeout):
+        captured.update(json)
+        return mock_resp
+
+    with patch("src.ollama.requests.post", side_effect=capture):
+        w = OllamaWorker("hello", "127.0.0.1", 11434, "gemma4", system="Be brief.")
+        w.run()
+
+    assert captured.get("system") == "Be brief."
+
+
+def test_ollama_worker_omits_system_when_empty():
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    from unittest.mock import patch, MagicMock
+    app = QApplication.instance() or QApplication(sys.argv)
+    from src.ollama import OllamaWorker
+
+    captured = {}
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {"response": "ok"}
+
+    def capture(url, json, timeout):
+        captured.update(json)
+        return mock_resp
+
+    with patch("src.ollama.requests.post", side_effect=capture):
+        w = OllamaWorker("hello", "127.0.0.1", 11434, "gemma4")
+        w.run()
+
+    assert "system" not in captured
