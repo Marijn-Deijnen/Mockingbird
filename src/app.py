@@ -109,6 +109,10 @@ class MainWindow(QMainWindow):
         self._library_panel.file_renamed.connect(self._on_file_renamed)
         self._ai_settings_panel.settings_changed.connect(self._on_ai_settings_changed)
 
+        # Push initial voice name to AIPanel if a voice is already selected
+        initial_voice_name = self._voice_selector.current_display_name() or ""
+        self._ai_panel.update_voice_name(initial_voice_name)
+
     def _on_ai_settings_changed(self, values: dict):
         self._cfg.update(values)
         config.save(self._cfg)
