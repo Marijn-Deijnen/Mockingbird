@@ -99,3 +99,16 @@ def test_rename_output_returns_old_path_on_empty_name(tmp_path):
     result = rename_output(str(wav), "   ")
     assert result == str(wav)
     assert wav.exists()
+
+
+def test_play_calls_winsound(tmp_path):
+    import winsound
+    import src.audio as audio_mod
+    from unittest.mock import patch
+    wav = tmp_path / "test.wav"
+    wav.write_bytes(b"RIFF")
+    with patch("src.audio.winsound.PlaySound") as mock_play:
+        audio_mod.play(str(wav))
+    mock_play.assert_called_once_with(
+        str(wav), winsound.SND_FILENAME | winsound.SND_ASYNC
+    )
