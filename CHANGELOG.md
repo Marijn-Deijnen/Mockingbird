@@ -6,6 +6,16 @@ Versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
+## [1.1.0] — 2026-04-13
+
+### Added
+- **Style prefix** — set a tone/emotion/pace description (e.g. `cheerful, slightly faster`) in General Settings; it is automatically prepended to generated text as `(prefix)text` on every generation
+- **Auto-play on complete** — toggle in General Settings to automatically play generated audio when synthesis finishes
+- **AI System Prompt** — editable system prompt for the Ollama AI assistant (visible in General Settings when AI is enabled); supports a `{voice_name}` placeholder that is substituted with the currently selected voice at request time
+- **General Settings** — renamed from "Generate Tab" to "General Settings" to better reflect the scope of options it contains
+
+---
+
 ## [1.0.0] — 2026-04-13
 
 Initial release.
