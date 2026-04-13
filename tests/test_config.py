@@ -58,3 +58,11 @@ def test_load_includes_voice_profiles_default(tmp_config):
     import src.config as cfg_mod
     result = cfg_mod.load()
     assert result["voice_profiles"] == {}
+
+
+def test_load_includes_general_settings_defaults(tmp_config):
+    import src.config as cfg_mod
+    result = cfg_mod.load()
+    assert result["style_prefix"] == ""
+    assert result["auto_play"] is False
+    assert "{voice_name}" in result["ai_system_prompt"]
