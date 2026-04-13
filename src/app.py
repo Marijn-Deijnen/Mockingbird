@@ -69,6 +69,9 @@ class MainWindow(QMainWindow):
             self._cfg.get("ollama_enabled", False)
             and self._cfg.get("show_ai_prompt", True)
         )
+        self._ai_panel.update_system_prompt(
+            self._cfg.get("ai_system_prompt", "")
+        )
         self._text_panel = TextPanel()
         self._settings_panel = SettingsPanel(self._cfg)
         self._output_panel = OutputPanel()
@@ -117,10 +120,13 @@ class MainWindow(QMainWindow):
             values["ollama_port"],
             values["ollama_model"],
         )
+        self._ai_panel.update_system_prompt(values["ai_system_prompt"])
 
     def _on_voice_changed(self, voice_id: str, path: str) -> None:
         self._cfg["last_voice_id"] = voice_id
         config.save(self._cfg)
+        voice_name = self._voice_selector.current_display_name() or ""
+        self._ai_panel.update_voice_name(voice_name)
         profile = self._cfg["voice_profiles"].get(voice_id)
         if profile:
             self._settings_panel.set_values(
@@ -158,6 +164,9 @@ class MainWindow(QMainWindow):
 
         ref_path = self._voice_selector.current_path()
         text = self._text_panel.text()
+        prefix = self._cfg.get("style_prefix", "").strip()
+        if prefix:
+            text = f"({prefix}){text}"
 
         if not ref_path:
             self._output_panel.show_warning("Please select a voice.")
@@ -209,6 +218,9 @@ class MainWindow(QMainWindow):
         entries = library.add_entry(entry)
         self._library_panel.load_entries(entries)
         self._output_panel.set_output(out_path)
+
+        if self._cfg.get("auto_play", False):
+            audio.play(out_path)
 
         if self._cfg.get("ollama_enabled") and self._cfg.get("ollama_model"):
             self._naming_worker = NamingWorker(
