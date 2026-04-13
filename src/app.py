@@ -34,6 +34,7 @@ class MainWindow(QMainWindow):
         self._naming_worker: NamingWorker | None = None
         self._current_output_path: str | None = None
         self._current_output_id: str | None = None
+        self._pending_text: str = ""
         self._setup_ui()
         preload_model(self._cfg.get("use_denoiser", False))
 
@@ -172,6 +173,8 @@ class MainWindow(QMainWindow):
         if prefix:
             text = f"({prefix}){text}"
 
+        self._pending_text = text
+
         if not ref_path:
             self._output_panel.show_warning("Please select a voice.")
             return
@@ -208,7 +211,7 @@ class MainWindow(QMainWindow):
         self._current_output_path = out_path
         self._current_output_id = Path(out_path).stem
 
-        text = self._text_panel.text()
+        text = self._pending_text
         ref_path = self._voice_selector.current_path()
 
         entry = {
