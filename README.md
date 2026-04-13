@@ -29,12 +29,13 @@ Mockingbird is a desktop GUI for reference-based voice cloning. Import any short
 |---|---|---|
 | 🎙️ | **Voice library** | Import `.wav` or `.mp3` files as named voices, stored locally |
 | 🎛️ | **Per-voice settings** | CFG value, inference steps, and denoiser saved per voice |
-| ▶️ | **Playback** | Listen to generated output directly in the app |
+| 🎭 | **Style prefix** | Set a tone/emotion/pace description (e.g. `cheerful, slightly faster`) applied to every generation |
+| ▶️ | **Playback** | Listen to generated output directly in the app, with optional auto-play on complete |
 | 🏷️ | **File naming** | Rename outputs inline, or let AI name them automatically |
 | 📚 | **Library** | Browse, filter, play and delete all generated files |
 | ⚡ | **Model caching** | Model loads once at startup and stays warm — no reload delay |
 | 🖥️ | **GPU acceleration** | CUDA used automatically when available, falls back to CPU |
-| 🤖 | **AI assistant** | Optional Ollama integration for prompt generation and auto-naming |
+| 🤖 | **AI assistant** | Optional Ollama integration for prompt generation, auto-naming, and customisable system prompt |
 
 ---
 
@@ -99,14 +100,19 @@ Library tab → Browse, filter, replay, or delete past generations
 
 Settings are saved per voice and restored automatically when you switch voices.
 
+### Style Prefix
+
+In **Settings → General Settings**, enter a comma-separated description in the **Style prefix** field (e.g. `warm, slightly slower`). It is prepended to every generation as `(warm, slightly slower)Your text here`, giving you persistent tone and pace control without modifying your text each time.
+
 ### AI Assistant *(optional)*
 
 1. Open the **Settings** tab
 2. Enter your Ollama host and port, click **Connect**, and select a model
 3. Enable the **Enable AI features** toggle
-4. Enable **Show AI Prompt panel** to show the prompt box in the Generate tab
-5. Describe what you want the AI to say → click **Ask AI** → result fills the text box
-6. After each generation the AI also suggests a filename (up to 5 words) automatically
+4. Optionally edit the **AI System Prompt** — use `{voice_name}` as a placeholder for the currently selected voice (e.g. `Write in the style of {voice_name}.`)
+5. Enable **Show AI Prompt panel** to show the prompt box in the Generate tab
+6. Describe what you want the AI to say → click **Ask AI** → result fills the text box
+7. After each generation the AI also suggests a filename (up to 5 words) automatically
 
 ---
 
