@@ -18,12 +18,13 @@ datas += collect_data_files("soundfile")         # libsndfile
 voxcpm_datas, voxcpm_binaries, voxcpm_hiddenimports = collect_all("voxcpm")
 datas += voxcpm_datas
 
-# Explicitly bundle Python runtime DLLs — PyInstaller sometimes misses these
-_py_dir = os.path.dirname(sys.executable)
+# Explicitly bundle Python runtime DLLs — PyInstaller sometimes misses these.
+# Use sys.base_prefix so this works correctly inside a venv too.
+_base_dir = sys.base_prefix
 binaries = [
     (dll, ".")
-    for dll in glob.glob(os.path.join(_py_dir, "python*.dll"))
-    + glob.glob(os.path.join(_py_dir, "vcruntime*.dll"))
+    for dll in glob.glob(os.path.join(_base_dir, "python*.dll"))
+    + glob.glob(os.path.join(_base_dir, "vcruntime*.dll"))
 ]
 binaries += voxcpm_binaries
 
