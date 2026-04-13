@@ -69,6 +69,12 @@ class VoiceSelector(QWidget):
             return None
         return str(VOICES_DIR / self._entries[idx]["filename"])
 
+    def current_display_name(self) -> str | None:
+        idx = self._combo.currentIndex()
+        if idx < 0 or idx >= len(self._entries):
+            return None
+        return self._entries[idx]["display_name"]
+
     def _on_index_changed(self, idx: int) -> None:
         if 0 <= idx < len(self._entries):
             e = self._entries[idx]

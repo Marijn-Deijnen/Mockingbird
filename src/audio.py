@@ -1,5 +1,6 @@
 import re
 import subprocess
+import winsound
 from datetime import datetime
 from pathlib import Path
 
@@ -44,3 +45,8 @@ def rename_output(old_path: str, new_name: str) -> str:
         counter += 1
     old.rename(candidate)
     return str(candidate.resolve())
+
+
+def play(path: str) -> None:
+    """Play a WAV file asynchronously using the Windows sound system."""
+    winsound.PlaySound(path, winsound.SND_FILENAME | winsound.SND_ASYNC)

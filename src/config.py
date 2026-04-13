@@ -16,6 +16,12 @@ DEFAULTS = {
     "ollama_model": "",
     "show_ai_prompt": True,
     "voice_profiles": {},
+    "style_prefix": "",
+    "auto_play": False,
+    "ai_system_prompt": (
+        'You are a TTS assistant. Rewrite the user\'s input as natural spoken text '
+        'for a voice called "{voice_name}". Return only the words to be spoken.'
+    ),
 }
 
 
