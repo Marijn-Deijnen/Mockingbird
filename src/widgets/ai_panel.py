@@ -20,6 +20,8 @@ class AIPanel(QGroupBox):
         self._host = host
         self._port = port
         self._model = model
+        self._system_prompt: str = ""
+        self._voice_name: str = ""
         self._worker: OllamaWorker | None = None
         self._setup_ui()
 
@@ -55,6 +57,12 @@ class AIPanel(QGroupBox):
         self._port = port
         self._model = model
 
+    def update_system_prompt(self, system_prompt: str) -> None:
+        self._system_prompt = system_prompt
+
+    def update_voice_name(self, voice_name: str) -> None:
+        self._voice_name = voice_name
+
     def _on_ask(self):
         prompt = self._prompt_edit.toPlainText().strip()
         if not prompt:
@@ -79,6 +87,7 @@ class AIPanel(QGroupBox):
             host=self._host,
             port=self._port,
             model=self._model,
+            system=self._system_prompt.replace("{voice_name}", self._voice_name or "unknown"),
         )
         self._worker.finished.connect(self._on_finished)
         self._worker.error.connect(self._on_error)
